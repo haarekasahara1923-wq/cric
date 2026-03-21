@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #000000;
+  --foreground: #ffffff;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-black font-bold py-2 px-6 rounded-lg transition-transform active:scale-95 duration-200 hover:bg-accent;
+  }
+  .card {
+    @apply bg-card border border-border rounded-xl p-4 shadow-xl transition-all hover:bg-[#141414] active:scale-[0.98];
+  }
+  .glass {
+    @apply bg-secondary/80 backdrop-blur-md border border-white/5;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}

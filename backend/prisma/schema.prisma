@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum MatchStatus {
+  UPCOMING
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PredictionStatus {
+  PENDING
+  WON
+  LOST
+  VOID
+}
+
+model User {
+  id              String      @id @default(uuid())
+  email           String      @unique
+  name            String?
+  points_balance  Int         @default(10000)
+  level           Int         @default(1)
+  xp              Int         @default(0)
+  role            UserRole    @default(USER)
+  avatar_url      String?
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+
+  transactions    WalletTransaction[]
+  predictions     UserPrediction[]
+  leaderboard     Leaderboard?
+}
+
+model WalletTransaction {
+  id          String          @id @default(uuid())
+  user_id     String
+  user        User            @relation(fields: [user_id], references: [id])
+  type        TransactionType
+  amount      Int
+  reason      String
+  created_at  DateTime        @default(now())
+}
+
+model Match {
+  id            String      @id @default(uuid())
+  api_match_id  String      @unique
+  team_a        String
+  team_b        String
+  team_a_img    String?
+  team_b_img    String?
+  venue         String?
+  start_time    DateTime
+  status        MatchStatus @default(UPCOMING)
+  result        String?
+  winner_team   String?
+  scorecard     Json?
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+
+  predictions   Prediction[]
+}
+
+model Prediction {
+  id              String      @id @default(uuid())
+  match_id        String
+  match           Match       @relation(fields: [match_id], references: [id])
+  type            String      // e.g., "MATCH_WINNER", "TOSS_WINNER"
+  question        String
+  options         Json        // Array of options with values
+  lock_time       DateTime
+  points_multiplier Float     @default(1.0)
+  min_points      Int         @default(100)
+  max_points      Int         @default(5000)
+  is_settled      Boolean     @default(false)
+  correct_option  String?
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+
+  user_predictions UserPrediction[]
+}
+
+model UserPrediction {
+  id                String            @id @default(uuid())
+  user_id           String
+  user              User              @relation(fields: [user_id], references: [id])
+  prediction_id     String
+  prediction        Prediction        @relation(fields: [prediction_id], references: [id])
+  selected_option   String
+  points_used       Int
+  estimated_payout  Int
+  status            PredictionStatus  @default(PENDING)
+  result_points     Int?
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @updatedAt
+
+  @@unique([user_id, prediction_id])
+}
+
+model Leaderboard {
+  id              String   @id @default(uuid())
+  user_id         String   @unique
+  user            User     @relation(fields: [user_id], references: [id])
+  total_points    Int      @default(0)
+  rank            Int?
+  period          String   // "DAILY", "WEEKLY", "SEASON"
+  last_updated    DateTime @default(now()) @updatedAt
+}
