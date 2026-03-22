@@ -9,12 +9,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "#FFD700", // Gold
-        secondary: "#1A1A1A", // Dark Gray
-        accent: "#C5A000", // Dark Gold
-        background: "#000000", // Pure Black
-        card: "#0F0F0F",
-        border: "#262626",
+        primary: "#CCF400", // Satyam77 Neon Green
+        surface: "#1A1A1A", // Satyam77 Surface
+        background: "#0D0D0D", // Deep Black
+        border: "#2A2A2A",
+        "text-muted": "#888888",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
