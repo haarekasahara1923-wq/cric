@@ -1,45 +1,26 @@
-"use client";
-
-import { useState } from "react";
-import { 
-  Trophy, 
-  Wallet, 
-  Zap, 
-  ChevronRight, 
-  LayoutDashboard, 
-  Calendar, 
-  CircleUser,
-  LogOut,
-  Bell,
-  ShieldCheck
-} from "lucide-react";
-import Link from "next/link";
+import { useEffect } from "react";
+import api from "@/lib/api";
 
 export default function Dashboard() {
   const [balance] = useState(10000);
   const [userRank] = useState(128);
   const [level] = useState(2);
+  const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const upcomingMatches = [
-    {
-      id: "1",
-      teamA: "CSK",
-      teamB: "MI",
-      teamAImg: "https://upload.wikimedia.org/wikipedia/en/thumb/2/2b/Chennai_Super_Kings_Logo.svg/1200px-Chennai_Super_Kings_Logo.svg.png",
-      teamBImg: "https://upload.wikimedia.org/wikipedia/en/thumb/c/cd/Mumbai_Indians_Logo.svg/1200px-Mumbai_Indians_Logo.svg.png",
-      time: "Tomorrow, 7:30 PM",
-      venue: "Wankhede Stadium, Mumbai"
-    },
-    {
-      id: "2",
-      teamA: "RCB",
-      teamB: "KKR",
-      teamAImg: "https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/Royal_Challengers_Bangalore_Logo.svg/1200px-Royal_Challengers_Bangalore_Logo.svg.png",
-      teamBImg: "https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Kolkata_Knight_Riders_Logo.svg/1200px-Kolkata_Knight_Riders_Logo.svg.png",
-      time: "Wed, 7:30 PM",
-      venue: "M. Chinnaswamy Stadium, Bengaluru"
-    }
-  ];
+  useEffect(() => {
+    const fetchMatches = async () => {
+      try {
+        const response = await api.get('/matches');
+        setUpcomingMatches(response.data);
+      } catch (error) {
+        console.error('Failed to fetch matches:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMatches();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-black">
@@ -149,41 +130,56 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
-              {upcomingMatches.map((match) => (
-                <div key={match.id} className="card p-0 flex flex-col group border-zinc-800 hover:border-primary/40">
-                  <div className="p-6 flex items-center justify-between">
-                    <div className="flex flex-col items-center gap-3 flex-1">
-                      <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
-                        <img src={match.teamAImg} alt={match.teamA} className="w-full h-full object-contain" />
+              {loading ? (
+                <div className="col-span-full py-20 text-center text-zinc-500 font-bold uppercase tracking-widest animate-pulse">
+                  Loading matches...
+                </div>
+              ) : upcomingMatches.length > 0 ? (
+                upcomingMatches.map((match) => (
+                  <div key={match.id} className="card p-0 flex flex-col group border-zinc-800 hover:border-primary/40">
+                    <div className="p-6 flex items-center justify-between">
+                      <div className="flex flex-col items-center gap-3 flex-1">
+                        <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
+                          <img src={match.team_a_img || 'https://flagsapi.com/IN/flat/64.png'} alt={match.team_a} className="w-full h-full object-contain" />
+                        </div>
+                        <span className="font-extrabold text-white text-lg">{match.team_a}</span>
                       </div>
-                      <span className="font-extrabold text-white text-lg">{match.teamA}</span>
+                      
+                      <div className="flex flex-col items-center flex-1 px-4">
+                        <div className="text-[10px] bg-primary/20 text-primary font-black px-3 py-1 rounded-full mb-3 uppercase tracking-tighter animate-pulse">
+                          VS
+                        </div>
+                        <span className="text-zinc-600 text-[10px] font-bold text-center uppercase tracking-tighter">
+                          {new Date(match.start_time).toLocaleString([], { weekday: 'short', hour: '2-digit', minute:'2-digit' })}
+                        </span>
+                      </div>
+  
+                      <div className="flex flex-col items-center gap-3 flex-1">
+                        <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
+                          <img src={match.team_b_img || 'https://flagsapi.com/IN/flat/64.png'} alt={match.team_b} className="w-full h-full object-contain" />
+                        </div>
+                        <span className="font-extrabold text-white text-lg">{match.team_b}</span>
+                      </div>
                     </div>
                     
-                    <div className="flex flex-col items-center flex-1 px-4">
-                      <div className="text-[10px] bg-primary/20 text-primary font-black px-3 py-1 rounded-full mb-3 uppercase tracking-tighter animate-pulse">
-                        VS
-                      </div>
-                      <span className="text-zinc-600 text-[10px] font-bold text-center uppercase tracking-tighter">{match.time}</span>
-                    </div>
-
-                    <div className="flex flex-col items-center gap-3 flex-1">
-                      <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
-                        <img src={match.teamBImg} alt={match.teamB} className="w-full h-full object-contain" />
-                      </div>
-                      <span className="font-extrabold text-white text-lg">{match.teamB}</span>
+                    <div className="px-6 py-4 bg-white/5 border-t border-zinc-800 flex items-center justify-between mt-auto">
+                      <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter flex items-center gap-1">
+                        <Zap className="w-3 h-3 text-primary" /> {match.venue || 'TBA'}
+                      </span>
+                      <Link href={`/matches/${match.id}`} className="bg-primary hover:bg-accent text-black font-black text-[10px] px-6 py-2 rounded-lg transition-colors uppercase tracking-widest">
+                        PREDICT NOW
+                      </Link>
                     </div>
                   </div>
-                  
-                  <div className="px-6 py-4 bg-white/5 border-t border-zinc-800 flex items-center justify-between mt-auto">
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter flex items-center gap-1">
-                      < Zap className="w-3 h-3 text-primary" /> {match.venue}
-                    </span>
-                    <Link href={`/matches/${match.id}`} className="bg-primary hover:bg-accent text-black font-black text-[10px] px-6 py-2 rounded-lg transition-colors uppercase tracking-widest">
-                      PREDICT NOW
-                    </Link>
-                  </div>
+                ))
+              ) : (
+                <div className="col-span-full py-20 text-center border-2 border-dashed border-zinc-900 rounded-2xl">
+                  <p className="text-zinc-600 font-bold uppercase tracking-widest text-sm mb-4">No Matches Found</p>
+                  <Link href="/matches/sync/upcoming" target="_blank" className="text-primary text-[10px] font-black uppercase hover:underline">
+                    Trigger Manual Sync
+                  </Link>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
