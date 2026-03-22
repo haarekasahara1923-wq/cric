@@ -11,11 +11,19 @@ async function bootstrap() {
   const port = configService.get('PORT') || 3001;
 
   // Use Helmet for security
-  app.use(helmet());
+  app.use(helmet({
+    crossOriginResourcePolicy: false,
+    crossOriginOpenerPolicy: false,
+  }));
 
   // CORS configuration
   app.enableCors({
-    origin: configService.get('FRONTEND_URL') || 'http://localhost:3000',
+    origin: [
+      configService.get('FRONTEND_URL') || 'http://localhost:3000',
+      'https://cric-xi.vercel.app',
+      'http://localhost:3000'
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 
