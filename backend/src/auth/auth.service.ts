@@ -14,7 +14,12 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {
-    this.resend = new Resend(this.configService.get('RESEND_API_KEY'));
+    const apiKey = this.configService.get<string>('RESEND_API_KEY');
+    if (apiKey) {
+      this.resend = new Resend(apiKey);
+    } else {
+      console.warn('⚠️ RESEND_API_KEY is missing. Email service will not work.');
+    }
   }
 
   async sendOtp(email: string) {
