@@ -1,35 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --background: #0D0D0D;
+  --surface: #1A1A1A;
+  --surface-light: #252525;
+  --primary: #CCF400; /* Satyam77 Neon Green */
+  --primary-hover: #B8DB00;
+  --blue-back: #A5D9FE; /* Back Odds Blue */
+  --pink-lay: #F8D0EB; /* Lay Odds Pink */
+  --text-main: #FFFFFF;
+  --text-muted: #888888;
+  --border: #2A2A2A;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #000000;
-  --foreground: #ffffff;
-}
-
 body {
-  color: var(--foreground);
-  background: var(--background);
+  background-color: var(--background);
+  color: var(--text-main);
+  font-family: 'Outfit', sans-serif;
 }
 
 @layer components {
-  .btn-primary {
-    @apply bg-primary text-black font-bold py-2 px-6 rounded-lg transition-transform active:scale-95 duration-200 hover:bg-accent;
-  }
   .card {
-    @apply bg-card border border-border rounded-xl p-4 shadow-xl transition-all hover:bg-[#141414] active:scale-[0.98];
+    @apply bg-surface border border-border rounded-xl transition-all duration-300;
   }
-  .glass {
-    @apply bg-secondary/80 backdrop-blur-md border border-white/5;
+  
+  .btn-primary {
+    @apply bg-primary text-black font-extrabold uppercase tracking-widest px-6 py-3 rounded-lg hover:bg-primary-hover transition-all active:scale-95 text-xs;
+  }
+
+  .odds-box-back {
+    @apply bg-[#A5D9FE] text-[#003B64] font-black text-center p-2 rounded-md hover:brightness-110 transition-all cursor-pointer min-w-[60px];
+  }
+
+  .odds-box-lay {
+    @apply bg-[#F8D0EB] text-[#6A0E4B] font-black text-center p-2 rounded-md hover:brightness-110 transition-all cursor-pointer min-w-[60px];
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg transition-all text-text-muted hover:text-white hover:bg-white/5;
+  }
+
+  .sidebar-link.active {
+    @apply text-primary bg-primary/10 border-r-4 border-primary rounded-r-none;
   }
 }
 
-/* Custom animations */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
 }
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-light);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
