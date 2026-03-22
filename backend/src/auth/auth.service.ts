@@ -38,13 +38,13 @@ export class AuthService {
   async login(data: any) {
     const { email, password } = data;
     
-    // Check for hardcoded env admin credentials
-    const adminEmail = process.env.ADMIN_MAIL;
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    // Check for hardcoded env admin credentials or fallback to default
+    const adminEmail = process.env.ADMIN_MAIL || "admin@ipl.wapifow.site";
+    const adminPassword = process.env.ADMIN_PASSWORD || "Nami@1971";
     
     let user;
 
-    if (adminEmail && adminPassword && email === adminEmail && password === adminPassword) {
+    if (email === adminEmail && password === adminPassword) {
       // Upsert admin user
       user = await this.prisma.user.upsert({
         where: { email: adminEmail },

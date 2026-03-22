@@ -15,30 +15,30 @@ import {
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#050505] text-white selection:bg-primary selection:text-black">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-black/40 backdrop-blur-xl border-b border-white/5 px-6 md:px-12 py-4 flex items-center justify-between">
+      {/* Navigation - Mobile Optimized */}
+      <nav className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/5 px-4 md:px-12 py-3 flex items-center justify-between">
          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-               <Activity className="text-black w-5 h-5 font-black" />
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-xl flex items-center justify-center shrink-0">
+               <Activity className="text-black w-4 h-4 md:w-5 md:h-5 font-black" />
             </div>
-            <h1 className="text-xl font-black italic tracking-tighter uppercase">CRIC<span className="text-primary italic">ORANGE</span></h1>
+            <h1 className="text-lg md:text-2xl font-black italic tracking-tighter uppercase whitespace-nowrap">CRIC<span className="text-primary italic">ORANGE</span></h1>
          </div>
-         <div className="flex items-center gap-6">
-            <Link href="/auth/login" className="text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-primary transition-colors">Login</Link>
-            <Link href="/auth/register" className="px-6 py-2.5 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-primary transition-all">Join Now</Link>
+         <div className="flex items-center gap-3 md:gap-6">
+            <Link href="/auth/login" className="text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-300 hover:text-primary transition-colors whitespace-nowrap">Login</Link>
+            <Link href="/auth/register" className="px-4 py-2 bg-white text-black text-[10px] md:text-xs font-black uppercase tracking-widest rounded-full hover:bg-primary transition-all whitespace-nowrap">Join Now</Link>
          </div>
       </nav>
 
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
+        {/* Background Image with Overlay - Restored Catchy Look */}
         <div className="absolute inset-0 z-0">
           <img 
             src="/ipl_hero_bg_1774171334342.png" 
             alt="IPL Action" 
-            className="w-full h-full object-cover object-top scale-100 animate-pulse-slow opacity-50 transition-opacity duration-1000"
+            className="w-full h-full object-cover object-center scale-105 animate-pulse-slow opacity-60"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-[#050505]/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-transparent to-[#050505]" />
         </div>
 
@@ -48,21 +48,21 @@ export default function Home() {
              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary drop-shadow-sm">IPL 2026 LIVE PREDICTION</span>
           </div>
           
-          <h2 className="text-6xl md:text-9xl font-black italic tracking-tighter uppercase mb-6 drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+          <h2 className="text-5xl sm:text-7xl md:text-9xl font-black italic tracking-tighter uppercase mb-6 drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
             PREDICT <br /> <span className="text-transparent stroke-text italic font-outline-2 drop-shadow-lg">DOMINATE</span>
           </h2>
           
-          <p className="text-zinc-300 text-sm md:text-lg max-w-2xl mx-auto font-bold tracking-wide mb-12 uppercase leading-relaxed text-shadow-md">
-            Unleash your cricket IQ on India's most premium <span className="text-white border-b-2 border-primary pb-0.5">virtual prediction</span> hub. 
+          <p className="text-zinc-300 text-xs sm:text-sm md:text-lg max-w-2xl mx-auto font-bold tracking-wide mb-10 md:mb-12 uppercase leading-relaxed text-shadow-md px-4">
+            Unleash your cricket IQ on India's most premium <span className="text-white border-b-2 border-primary pb-0.5 whitespace-nowrap">virtual prediction</span> hub. 
             Real-time analytics, zero risk, infinite glory.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/auth/login" className="group px-10 py-5 bg-primary text-black rounded-2xl font-black uppercase tracking-[0.2em] text-xs flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-[0_10px_40px_-10px_rgba(255,107,0,0.5)] active:shadow-none hover:bg-white hover:text-black">
-               Enter Arena <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full px-4">
+            <Link href="/auth/login" className="group w-full md:w-auto justify-center px-8 py-4 bg-primary text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] md:text-xs flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-[0_10px_40px_-10px_rgba(255,107,0,0.5)] active:shadow-none hover:bg-white hover:text-black">
+               Enter Arena <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link href="/leaderboard" className="group px-10 py-5 bg-white/5 border border-white/10 rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-white/10 hover:border-white/20 transition-all flex items-center gap-3">
-               View Leaderboard <Trophy size={16} className="text-primary group-hover:scale-110 transition-transform" />
+            <Link href="/leaderboard" className="group w-full md:w-auto justify-center px-8 py-4 bg-white/5 border border-white/10 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] md:text-xs hover:bg-white/10 hover:border-white/20 transition-all flex items-center gap-3">
+               View Leaderboard <Trophy size={14} className="text-primary group-hover:scale-110 transition-transform" />
             </Link>
           </div>
         </div>
