@@ -11,7 +11,8 @@ import {
   CheckCircle2,
   Info,
   History,
-  Activity
+  Activity,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,35 +24,45 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
   const [betAmount, setBetAmount] = useState<number>(500);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<'BACK' | 'LAY' | null>(null);
+  const [selectedOdds, setSelectedOdds] = useState<number | null>(null);
   const [selectedPredictionId, setSelectedPredictionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
+  // Fetch match data every 5 seconds for live odds
   useEffect(() => {
     const fetchMatch = async () => {
       try {
         const response = await api.get(`/matches/${params.id}`);
         setMatch(response.data);
       } catch (error) {
-        toast.error("Match not found");
-        router.push("/dashboard");
+        if (loading) router.push("/dashboard");
       } finally {
         setLoading(false);
       }
     };
+
     fetchMatch();
-  }, [params.id, router]);
+    const interval = setInterval(fetchMatch, 5000);
+    return () => clearInterval(interval);
+  }, [params.id, router, loading]);
 
   const placeBet = async () => {
-    if (!selectedOption || !selectedPredictionId || !selectedType) return;
+    if (!selectedOption || !selectedPredictionId || !selectedType || !selectedOdds) return;
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      // In real app, send to /predictions/place
+      setTimeout(() => {
+        setSubmitting(false);
+        toast.success(`Bet Placed: ${selectedOption} @ ${selectedOdds} (${selectedType})`);
+        setSelectedOption(null);
+        setSelectedType(null);
+      }, 800);
+    } catch (error) {
+      toast.error("Failed to place bet");
       setSubmitting(false);
-      toast.success(`Bet Placed: ${selectedOption} @ 1.85 (${selectedType})`);
-      setSelectedOption(null);
-      setSelectedType(null);
-    }, 1000);
+    }
   };
 
   if (loading) return (
@@ -68,10 +79,10 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
           <Link href="/dashboard" className="text-text-muted hover:text-white transition-colors">
             <ChevronLeft className="w-6 h-6" />
           </Link>
-          <span className="font-black text-lg italic tracking-tighter text-primary uppercase">{match.team_a} <span className="text-white text-xs">VS</span> {match.team_b}</span>
+          <span className="font-black text-lg italic tracking-tighter text-primary uppercase">{match.team_a} <span className="text-white text-xs whitespace-nowrap px-2">VS</span> {match.team_b}</span>
         </div>
         <div className="flex items-center gap-4">
-           <div className="flex flex-col items-end px-4 border-r border-[#2A2A2A]">
+           <div className="hidden sm:flex flex-col items-end px-4 border-r border-[#2A2A2A]">
             <span className="text-[9px] font-bold text-text-muted uppercase tracking-widest leading-none mb-1">Exposure</span>
             <span className="text-pink-400 font-black text-sm leading-none">0 <span className="text-[9px]">PTS</span></span>
           </div>
@@ -82,84 +93,107 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
         </div>
       </header>
 
-      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6">
         {/* Main Markets Section */}
         <div className="lg:col-span-8 space-y-4">
-          {/* Real-time score mock */}
-          <div className="card bg-gradient-to-r from-[#1A1A1A] to-[#222] border-zinc-800 p-6 flex flex-col md:flex-row items-center justify-between">
-             <div className="flex items-center gap-6">
-                <div className="text-center">
-                   <div className="text-xs font-bold text-text-muted uppercase mb-1">{match.team_a}</div>
+          {/* Match Status Card */}
+          <div className="card bg-gradient-to-r from-[#1A1A1A] to-[#222] border-zinc-800 p-6 flex flex-col md:flex-row items-center justify-between relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-4 opacity-10"><Activity size={80} /></div>
+             <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
+                <div className="text-center w-24">
+                   <div className="text-[10px] font-bold text-text-muted uppercase mb-2 truncate">{match.team_a}</div>
                    <div className="text-2xl font-black italic">-- / -</div>
                    <div className="text-[10px] text-zinc-600 font-bold uppercase">(0.0)</div>
                 </div>
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-black text-primary text-xs">VS</div>
-                <div className="text-center">
-                   <div className="text-xs font-bold text-text-muted uppercase mb-1">{match.team_b}</div>
+                <div className="flex flex-col items-center">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-black text-primary text-[10px] ring-1 ring-primary/20">VS</div>
+                    <span className="text-[8px] bg-red-500/20 text-red-500 px-2 py-0.5 rounded font-black mt-2 animate-pulse">{match.status}</span>
+                </div>
+                <div className="text-center w-24">
+                   <div className="text-[10px] font-bold text-text-muted uppercase mb-2 truncate">{match.team_b}</div>
                    <div className="text-2xl font-black italic">Yet to Bat</div>
                    <div className="text-[10px] text-zinc-600 font-bold uppercase">(0.0)</div>
                 </div>
              </div>
-             <div className="mt-4 md:mt-0 px-4 py-2 bg-black border border-zinc-800 rounded-lg text-center">
-                <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Ground Info</div>
-                <div className="text-xs font-black text-primary uppercase">{match.venue || 'TBA'}</div>
-                <div className="text-[8px] text-zinc-600 font-bold mt-1 uppercase tracking-tighter">Day/Night Match</div>
+             <div className="mt-8 md:mt-0 p-4 bg-black/40 border border-zinc-800 rounded-xl text-center min-w-[140px]">
+                <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Venue Info</div>
+                <div className="text-xs font-black text-primary uppercase line-clamp-1">{match.venue || 'International Ground'}</div>
+                <div className="text-[8px] text-zinc-600 font-bold mt-1 uppercase tracking-tighter">Live from {new Date(match.start_time).toLocaleDateString()}</div>
              </div>
           </div>
 
-          {/* Market Header Tab */}
-          <div className="flex gap-2 bg-[#1A1A1A] p-1 rounded-lg border border-[#2A2A2A]">
-             <button className="px-6 py-2 bg-primary text-black font-black text-[10px] rounded-md shadow-lg shadow-primary/20 uppercase">Match Odds</button>
-             <button className="px-6 py-2 text-text-muted font-bold text-[10px] hover:text-white transition-all uppercase">Bookmaker</button>
-             <button className="px-6 py-2 text-text-muted font-bold text-[10px] hover:text-white transition-all uppercase">Fancy</button>
+          {/* Market Tabs */}
+          <div className="flex gap-2 bg-[#1A1A1A] p-1.5 rounded-xl border border-[#2A2A2A] w-fit">
+             <button className="px-6 py-2.5 bg-primary text-black font-black text-[10px] rounded-lg shadow-lg shadow-primary/20 uppercase tracking-widest transition-all">Exchange</button>
+             <button className="px-6 py-2.5 text-text-muted font-bold text-[10px] hover:text-white transition-all uppercase tracking-widest">Bookmaker</button>
+             <button className="px-6 py-2.5 text-text-muted font-bold text-[10px] hover:text-white transition-all uppercase tracking-widest">Fancy</button>
           </div>
 
-          {/* Markets List */}
-          <div className="space-y-2">
-            {match.predictions?.map((pred: any) => (
-              <div key={pred.id} className="card bg-[#1A1A1A] border-[#2A2A2A] overflow-hidden">
-                <div className="bg-[#252525] px-4 py-2 border-b border-[#2A2A2A] flex justify-between items-center">
-                   <h3 className="text-[10px] font-black italic tracking-tighter text-white uppercase">{pred.question}</h3>
-                   <div className="flex items-center gap-4 text-[9px] font-bold">
-                      <span className="text-blue-400">Back</span>
-                      <span className="text-pink-400">Lay</span>
-                   </div>
+          {/* Dynamic Markets List */}
+          <div className="space-y-3">
+            {match.predictions?.map((pred: any) => {
+              const odds = (pred.odds as any) || {};
+              return (
+                <div key={pred.id} className="card bg-[#1A1A1A] border-[#2A2A2A] overflow-hidden group hover:border-[#333]">
+                  <div className="bg-[#222] px-4 py-3 border-b border-[#2A2A2A] flex justify-between items-center group-hover:bg-[#282828] transition-colors">
+                     <div className="flex items-center gap-3">
+                        <TrendingUp className="w-4 h-4 text-primary" />
+                        <h3 className="text-[11px] font-black italic tracking-tight text-white uppercase">{pred.question}</h3>
+                     </div>
+                     <div className="flex items-center gap-2">
+                        <div className="w-16 text-center text-[10px] font-black text-blue-400 uppercase tracking-tighter">Back</div>
+                        <div className="w-16 text-center text-[10px] font-black text-pink-400 uppercase tracking-tighter">Lay</div>
+                     </div>
+                  </div>
+                  
+                  <div className="divide-y divide-[#2A2A2A]">
+                    {pred.options.map((opt: string) => (
+                      <div key={opt} className="flex items-center justify-between p-3.5 hover:bg-white/5 transition-all">
+                         <div className="flex items-center gap-3">
+                            <div className="w-1.5 h-1.5 rounded-full bg-zinc-800 border border-zinc-700"></div>
+                            <span className="font-black text-[11px] uppercase tracking-tighter text-zinc-300">{opt}</span>
+                         </div>
+                         <div className="flex gap-2">
+                            <button 
+                              onClick={() => { 
+                                setSelectedOption(opt); 
+                                setSelectedType('BACK'); 
+                                setSelectedPredictionId(pred.id); 
+                                setSelectedOdds(odds[opt]?.back || 1.85);
+                              }}
+                              className={`odds-box-back w-16 h-12 flex flex-col items-center justify-center transition-all ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'BACK' ? 'ring-2 ring-white scale-105' : 'hover:scale-105'}`}
+                            >
+                               <div className="text-[13px] font-black">{odds[opt]?.back || '1.85'}</div>
+                               <div className="text-[7px] opacity-70 font-bold mt-0.5">{(Math.random() * 50).toFixed(1)}k</div>
+                            </button>
+                            <button 
+                              onClick={() => { 
+                                setSelectedOption(opt); 
+                                setSelectedType('LAY'); 
+                                setSelectedPredictionId(pred.id); 
+                                setSelectedOdds(odds[opt]?.lay || 1.87);
+                              }}
+                              className={`odds-box-lay w-16 h-12 flex flex-col items-center justify-center transition-all ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'LAY' ? 'ring-2 ring-white scale-105' : 'hover:scale-105'}`}
+                            >
+                               <div className="text-[13px] font-black">{odds[opt]?.lay || '1.87'}</div>
+                               <div className="text-[7px] opacity-70 font-bold mt-0.5">{(Math.random() * 30).toFixed(1)}k</div>
+                            </button>
+                         </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                
-                <div className="divide-y divide-[#2A2A2A]">
-                  {pred.options.map((opt: string) => (
-                    <div key={opt} className="flex items-center justify-between p-3 hover:bg-white/5 transition-all">
-                       <span className="font-bold text-xs uppercase tracking-tighter">{opt}</span>
-                       <div className="flex gap-2">
-                          <button 
-                            onClick={() => { setSelectedOption(opt); setSelectedType('BACK'); setSelectedPredictionId(pred.id); }}
-                            className={`odds-box-back ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'BACK' ? 'ring-2 ring-white' : ''}`}
-                          >
-                             <div className="text-xs">1.85</div>
-                             <div className="text-[7px] opacity-70 font-bold mt-0.5">24.5k</div>
-                          </button>
-                          <button 
-                            onClick={() => { setSelectedOption(opt); setSelectedType('LAY'); setSelectedPredictionId(pred.id); }}
-                            className={`odds-box-lay ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'LAY' ? 'ring-2 ring-white' : ''}`}
-                          >
-                             <div className="text-xs">1.92</div>
-                             <div className="text-[7px] opacity-70 font-bold mt-0.5">18.2k</div>
-                          </button>
-                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* Right Sidebar - Bet Slip */}
-        <div className="lg:col-span-4 space-y-6">
-           <div className="card bg-[#1A1A1A] border-primary/20 p-0 overflow-hidden sticky top-24 shadow-2xl">
-              <div className="bg-primary text-black font-black text-xs py-3 px-4 uppercase tracking-widest flex justify-between items-center">
+        <div className="lg:col-span-4 space-y-4">
+           <div className="card bg-[#1A1A1A] border-primary/10 p-0 overflow-hidden sticky top-24 shadow-2xl">
+              <div className="bg-primary text-black font-black text-xs py-4 px-5 uppercase tracking-widest flex justify-between items-center">
                  Bet Slip
-                 <Activity className="w-4 h-4" />
+                 <div className="w-2 h-2 bg-black rounded-full animate-pulse"></div>
               </div>
               
               <div className="p-6">
@@ -167,72 +201,93 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
                    <div className="space-y-6 animate-in slide-in-from-right duration-300">
                       <div className={`p-4 rounded-xl border-l-4 ${selectedType === 'BACK' ? 'bg-blue-400/10 border-blue-400' : 'bg-pink-400/10 border-pink-400'}`}>
                          <div className="flex justify-between items-start mb-2">
-                            <span className="text-[10px] font-black text-white/60 uppercase">{selectedType === 'BACK' ? 'Back (Buy)' : 'Lay (Sell)'}</span>
-                            <button onClick={() => setSelectedOption(null)} className="text-xs text-text-muted hover:text-white"><X size={14}/></button>
+                            <span className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none">{selectedType === 'BACK' ? 'Back (Buy)' : 'Lay (Sell)'}</span>
+                            <button onClick={() => setSelectedOption(null)} className="text-zinc-600 hover:text-white transition-colors"><X size={16}/></button>
                          </div>
-                         <div className="text-sm font-black text-white uppercase tracking-tight">{selectedOption}</div>
-                         <div className="text-[10px] font-bold text-primary mt-1">Odds: {selectedType === 'BACK' ? '1.85' : '1.92'}</div>
+                         <div className="text-sm font-black text-white uppercase tracking-tight mb-2">{selectedOption}</div>
+                         <div className="flex items-center gap-3">
+                             <div className="bg-black/40 px-3 py-1 rounded-lg border border-zinc-800">
+                                <span className="text-[8px] font-bold text-zinc-500 uppercase mr-2">Odds</span>
+                                <span className="text-primary font-black text-xs">{selectedOdds}</span>
+                             </div>
+                             <div className="bg-black/40 px-3 py-1 rounded-lg border border-zinc-800">
+                                <span className="text-[8px] font-bold text-zinc-500 uppercase mr-2">Market</span>
+                                <span className="text-white font-black text-[9px] uppercase tracking-tighter">Exchange</span>
+                             </div>
+                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                         <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">Stake (Points)</label>
+                      <div className="space-y-3">
+                         <div className="flex justify-between items-end">
+                            <label className="text-[9px] font-black text-text-muted uppercase tracking-[0.2em]">Stake Amount</label>
+                            <span className="text-[10px] font-black text-zinc-700 italic">Min: 100 | Max: 5.0L</span>
+                         </div>
                          <div className="relative">
                             <input 
                               type="number" 
                               value={betAmount}
                               onChange={(e) => setBetAmount(parseInt(e.target.value))}
-                              className="w-full bg-[#0D0D0D] border border-[#2A2A2A] rounded-lg px-4 py-3 text-white font-black text-lg focus:border-primary outline-none"
+                              className="w-full bg-[#0D0D0D] border border-[#2A2A2A] rounded-xl px-4 py-4 text-white font-black text-2xl focus:border-primary outline-none transition-all placeholder:text-zinc-800"
+                              placeholder="0"
                             />
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-primary font-black text-xs italic tracking-tighter">PTS</div>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                               <div className="h-4 w-[1px] bg-zinc-800"></div>
+                               <span className="text-primary font-black text-sm italic tracking-tighter">PTS</span>
+                            </div>
                          </div>
                       </div>
 
                       <div className="grid grid-cols-4 gap-2">
                         {[100, 500, 1000, 5000].map(amt => (
-                          <button key={amt} onClick={() => setBetAmount(amt)} className="bg-[#2A2A2A] hover:bg-zinc-700 text-[10px] font-black py-2 rounded transition-all">{amt >= 1000 ? `${amt/1000}K` : amt}</button>
+                          <button key={amt} onClick={() => setBetAmount(amt)} className="bg-[#2A2A2A] hover:bg-zinc-800 border border-[#333] hover:border-primary/40 text-[10px] font-black py-2.5 rounded-lg transition-all text-zinc-400 hover:text-white">{amt >= 1000 ? `${amt/1000}K` : amt}</button>
                         ))}
                       </div>
 
-                      <div className="bg-black/50 p-4 rounded-xl space-y-2">
-                         <div className="flex justify-between text-[10px] font-bold">
-                            <span className="text-text-muted uppercase">Potential Profit</span>
-                            <span className="text-green-400">{Math.floor(betAmount * 0.85).toLocaleString()} PTS</span>
+                      <div className="bg-black/50 p-5 rounded-2xl border border-zinc-900 space-y-3">
+                         <div className="flex justify-between text-[10px] font-black">
+                            <span className="text-zinc-600 uppercase tracking-widest">Est. Profit</span>
+                            <span className="text-green-400">+{Math.floor(betAmount * (selectedOdds || 1) - betAmount).toLocaleString()} PTS</span>
                          </div>
-                         <div className="flex justify-between text-[10px] font-bold border-t border-zinc-800 pt-2">
-                            <span className="text-text-muted uppercase">Total Payout</span>
-                            <span className="text-white">{(betAmount + Math.floor(betAmount * 0.85)).toLocaleString()} PTS</span>
+                         <div className="flex justify-between text-[10px] font-black border-t border-zinc-800/50 pt-3">
+                            <span className="text-zinc-600 uppercase tracking-widest">Total Liability</span>
+                            <span className="text-white">{betAmount.toLocaleString()} PTS</span>
                          </div>
                       </div>
 
                       <button 
                         disabled={submitting}
                         onClick={placeBet}
-                        className={`w-full py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all ${submitting ? 'bg-zinc-800 text-zinc-600' : 'bg-primary text-black hover:scale-[1.02] shadow-xl shadow-primary/20'}`}
+                        className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all relative overflow-hidden group ${submitting ? 'bg-zinc-800 text-zinc-600' : 'bg-primary text-black hover:scale-[1.01] active:scale-95 shadow-2xl shadow-primary/20'}`}
                       >
-                        {submitting ? 'Processing...' : 'Place Bet'}
+                        {submitting ? 'Authenticating...' : 'Confirm Order'}
+                        {!submitting && <div className="absolute top-0 right-0 p-2 opacity-5"><Zap size={40}/></div>}
                       </button>
                    </div>
                  ) : (
-                   <div className="text-center py-20">
-                      <TrendingUp className="w-12 h-12 text-zinc-800 mx-auto mb-4" />
-                      <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Click on odds to add a bet to your slip</p>
+                   <div className="text-center py-20 px-8">
+                      <div className="w-16 h-16 bg-zinc-900/50 rounded-3xl border border-zinc-800 flex items-center justify-center mx-auto mb-6">
+                         <Activity className="w-8 h-8 text-zinc-800" />
+                      </div>
+                      <p className="text-[10px] font-black text-zinc-700 uppercase tracking-[0.2em] leading-relaxed">Select an active price from the market to build your order</p>
                    </div>
                  )}
               </div>
            </div>
 
-           <div className="card bg-[#1A1A1A] border-[#2A2A2A] p-6">
-              <h3 className="text-xs font-black text-white italic uppercase tracking-tighter mb-4 flex items-center gap-2">
-                 <History className="w-4 h-4" /> My Active Bets (0)
-              </h3>
-              <p className="text-[10px] font-bold text-zinc-600 uppercase text-center py-4">No active bets for this match.</p>
+           {/* Quick History Overlay Style */}
+           <div className="card bg-[#1A1A1A] border-[#2A2A2A] p-5">
+              <div className="flex justify-between items-center mb-4">
+                 <h3 className="text-[10px] font-black text-white italic uppercase tracking-widest flex items-center gap-2">
+                    <History className="w-4 h-4 text-primary" /> Recent Bets
+                 </h3>
+                 <span className="text-[8px] bg-zinc-900 text-zinc-500 font-bold px-2 py-0.5 rounded">AUTO-SETTLE</span>
+              </div>
+              <div className="pt-4 border-t border-[#2A2A2A]">
+                 <p className="text-[9px] font-bold text-zinc-700 uppercase text-center italic">No settled orders found in last 24h.</p>
+              </div>
            </div>
         </div>
       </div>
     </div>
   );
 }
-
-const X = ({ size, className }: { size?: number, className?: string }) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-);

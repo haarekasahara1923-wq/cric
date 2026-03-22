@@ -98,14 +98,43 @@ export class MatchService implements OnModuleInit {
     }
   }
 
+  @Cron('*/30 * * * * *')
+  async updateLiveOdds() {
+    console.log('Update Live Odds Job Triggered');
+    const predictions = await this.prisma.prediction.findMany({
+      where: { match: { status: { in: ['UPCOMING', 'LIVE'] } } }
+    });
+
+    for (const pred of predictions) {
+      const currentOdds = (pred.odds as any) || {};
+      const newOdds: any = {};
+      
+      (pred.options as string[]).forEach(opt => {
+        const base = currentOdds[opt]?.back || 1.80 + Math.random() * 0.4;
+        const change = (Math.random() - 0.5) * 0.05;
+        const finalBack = Math.max(1.10, Math.min(5.00, base + change));
+        newOdds[opt] = {
+          back: parseFloat(finalBack.toFixed(2)),
+          lay: parseFloat((finalBack + 0.02 + Math.random() * 0.05).toFixed(2))
+        };
+      });
+
+      await this.prisma.prediction.update({
+        where: { id: pred.id },
+        data: { odds: newOdds }
+      });
+    }
+  }
+
   async generateMatchPredictions(matchId: string) {
-    const match = await this.prisma.match.findUnique({ where: { id: matchId } });
+    const match = await this.prisma.match.findUnique({
+      where: { id: matchId },
+    });
     if (!match) return;
 
     const existing = await this.prisma.prediction.findFirst({
       where: { match_id: matchId }
     });
-    
     if (existing) return;
 
     const defaultPredictions = [
@@ -141,15 +170,25 @@ export class MatchService implements OnModuleInit {
       }
     ];
 
-    for (const p of defaultPredictions) {
+    for (const pred of defaultPredictions) {
+      const initialOdds: any = {};
+      pred.options.forEach(opt => {
+        const val = 1.80 + Math.random() * 0.4;
+        initialOdds[opt] = {
+          back: parseFloat(val.toFixed(2)),
+          lay: parseFloat((val + 0.03).toFixed(2))
+        };
+      });
+
       await this.prisma.prediction.create({
         data: {
           match_id: matchId,
-          type: p.type,
-          question: p.question,
-          options: p.options as any,
+          type: pred.type,
+          question: pred.question,
+          options: pred.options,
+          odds: initialOdds,
           lock_time: match.start_time,
-        }
+        },
       });
     }
     
