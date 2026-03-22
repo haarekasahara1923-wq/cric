@@ -1,5 +1,20 @@
-import { useEffect } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import api from "@/lib/api";
+import { 
+  Trophy, 
+  Wallet, 
+  Zap, 
+  ChevronRight, 
+  LayoutDashboard, 
+  Calendar, 
+  CircleUser,
+  LogOut,
+  Bell,
+  ShieldCheck
+} from "lucide-react";
+import Link from "next/link";
 
 export default function Dashboard() {
   const [balance] = useState(10000);
