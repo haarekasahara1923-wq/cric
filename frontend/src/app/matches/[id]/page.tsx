@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { 
   ChevronLeft, 
@@ -38,13 +40,21 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
     fetchMatch();
   }, [params.id, router]);
 
-  const handlePredict = async (type: string) => {
+  const handlePredict = async () => {
+    if (!selectedWinner || !selectedPredictionId) return;
     setSubmitting(true);
-    // TODO: Connect to backend prediction API
-    setTimeout(() => {
+    try {
+      // For now, mimic success. We'll add the real prediction POST next.
+      setTimeout(() => {
+        setSubmitting(false);
+        toast.success(`Bet placed on ${selectedWinner}!`);
+        setSelectedWinner(null);
+        setSelectedPredictionId(null);
+      }, 1000);
+    } catch (error) {
+      toast.error("Failed to place prediction");
       setSubmitting(false);
-      toast.success(`Prediction placed for ${type}! Success.`);
-    }, 1000);
+    }
   };
 
   if (loading) return (
@@ -56,171 +66,124 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
   return (
     <div className="min-h-screen bg-black text-white p-4 md:p-8">
       {/* Header */}
-      <div className="max-w-5xl mx-auto flex items-center justify-between mb-8">
+      <div className="max-w-6xl mx-auto flex items-center justify-between mb-8">
         <Link href="/dashboard" className="flex items-center gap-2 text-primary hover:text-white transition-colors">
           <ChevronLeft /> <span className="font-bold uppercase tracking-tighter">Matches</span>
         </Link>
         <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-primary/20">
           <Wallet className="w-4 h-4 text-primary" />
-          <span className="font-bold text-white text-sm">10,000 pts</span>
+          <span className="font-bold text-white text-sm">10,000 PTS</span>
         </div>
       </div>
 
-      {/* Match Card */}
-      <div className="max-w-5xl mx-auto mb-10">
-        <div className="card bg-gradient-to-b from-[#111] to-black border-zinc-800 p-8 flex flex-col items-center">
-          <div className="flex items-center gap-4 text-xs font-black text-primary px-3 py-1 bg-primary/10 rounded-full mb-6 uppercase tracking-widest">
-            <Zap className="w-3 h-3 animate-pulse" /> {match.status}
-          </div>
-
-          <div className="w-full flex items-center justify-between px-4 md:px-12">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-zinc-900 border border-zinc-800 p-4 flex items-center justify-center">
-                <img src={match.team_a_img || 'https://flagsapi.com/IN/flat/64.png'} alt={match.team_a} className="w-full h-full object-contain" />
-              </div>
-              <h2 className="text-2xl font-black italic tracking-tighter uppercase">{match.team_a}</h2>
-            </div>
-
-            <div className="flex flex-col items-center flex-1">
-              <span className="text-5xl md:text-7xl font-black text-primary/10 select-none">VS</span>
-              <div className="mt-4 flex flex-col items-center gap-1">
-                <div className="flex items-center gap-2 text-zinc-500 font-bold text-xs uppercase tracking-tighter text-center">
-                  <Clock className="w-3 h-3" /> {new Date(match.start_time).toLocaleString()}
-                </div>
-                <div className="text-[10px] text-zinc-700 font-black uppercase tracking-widest">{match.venue || 'TBA'}</div>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-zinc-900 border border-zinc-800 p-4 flex items-center justify-center">
-                <img src={match.team_b_img || 'https://flagsapi.com/IN/flat/64.png'} alt={match.team_b} className="w-full h-full object-contain" />
-              </div>
-              <h2 className="text-2xl font-black italic tracking-tighter uppercase">{match.team_b}</h2>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Prediction Sections */}
-      <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Prediction Box */}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          {/* Winner Prediction */}
-          <div className="card p-6 bg-zinc-900 border-zinc-800">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-black text-white italic tracking-tighter">MATCH WINNER</h3>
-              <div className="flex items-center gap-1 text-[10px] text-zinc-500 bg-white/5 px-2 py-1 rounded-full uppercase tracking-widest font-bold">
-                <Users className="w-3 h-3" /> 2.4k Predicted
+          {/* Match Info Card */}
+          <div className="card bg-zinc-900 border-zinc-800 p-8 flex flex-col items-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4">
+              <div className="flex items-center gap-2 text-[10px] font-black text-primary px-3 py-1 bg-primary/10 rounded-full uppercase">
+                <Zap className="w-3 h-3 animate-pulse" /> {match.status}
               </div>
             </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                  <span className={`font-black uppercase tracking-widest text-sm ${selectedWinner === match.team_a ? "text-black" : "text-white"}`}>{match.team_a}</span>
-                </div>
-                <span className={`text-[10px] font-black uppercase tracking-tighter ${selectedWinner === match.team_a ? "text-black/60" : "text-primary group-hover:bg-primary group-hover:text-black"} px-2 py-1 bg-primary/10 rounded ml-2`}>1.85x</span>
-              </button>
 
-              <button 
-                onClick={() => setSelectedWinner(match.team_b)}
-                className={`p-4 rounded-xl border transition-all flex items-center justify-between group ${selectedWinner === match.team_b ? "bg-primary border-primary" : "bg-black border-zinc-800 hover:border-primary/50"}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-4 w-4 rounded-full border border-current flex items-center justify-center p-0.5">
-                    {selectedWinner === match.team_b && <div className="h-full w-full bg-black rounded-full" />}
-                  </div>
-                  <span className={`font-black uppercase tracking-widest text-sm ${selectedWinner === match.team_b ? "text-black" : "text-white"}`}>{match.team_b}</span>
-                </div>
-                <span className={`text-[10px] font-black uppercase tracking-tighter ${selectedWinner === match.team_b ? "text-black/60" : "text-primary group-hover:bg-primary group-hover:text-black"} px-2 py-1 bg-primary/10 rounded ml-2`}>2.10x</span>
-              </button>
+            <div className="w-full flex items-center justify-between px-4 md:px-12 mt-4">
+              <div className="flex flex-col items-center gap-4">
+                <img src={match.team_a_img || 'https://flagsapi.com/IN/flat/64.png'} alt={match.team_a} className="w-24 h-24 object-contain" />
+                <h2 className="text-2xl font-black italic tracking-tighter uppercase">{match.team_a}</h2>
+              </div>
+              <div className="flex flex-col items-center flex-1">
+                <span className="text-6xl font-black text-primary/5 select-none">VS</span>
+                <span className="text-[10px] text-zinc-500 font-bold uppercase mt-2">{new Date(match.start_time).toLocaleString([], { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
+              </div>
+              <div className="flex flex-col items-center gap-4">
+                <img src={match.team_b_img || 'https://flagsapi.com/IN/flat/64.png'} alt={match.team_b} className="w-24 h-24 object-contain" />
+                <h2 className="text-2xl font-black italic tracking-tighter uppercase">{match.team_b}</h2>
+              </div>
             </div>
           </div>
 
-          {/* Toss Prediction */}
-          <div className="card p-6 bg-zinc-900 border-zinc-800">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-black text-white italic tracking-tighter">TOSS WINNER</h3>
-              <div className="text-[10px] text-primary font-black uppercase tracking-widest bg-primary/10 px-2 py-1 rounded-full">LOCKED IN 1Hr</div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 opacity-75">
-              <button 
-                className={`p-4 rounded-xl border border-zinc-800 bg-black cursor-not-allowed`}
-              >
-                <span className="font-black uppercase tracking-widest text-sm text-zinc-400">{match.team_a}</span>
-              </button>
-              <button 
-                className={`p-4 rounded-xl border border-zinc-800 bg-black cursor-not-allowed`}
-              >
-                <span className="font-black uppercase tracking-widest text-sm text-zinc-400">{match.team_b}</span>
-              </button>
-            </div>
+          {/* Dynamic Predictions List */}
+          <div className="space-y-6">
+            <h3 className="text-zinc-500 font-black text-xs uppercase tracking-[0.2em] mb-4">Available Markets</h3>
+            {match.predictions?.length > 0 ? (
+              match.predictions.map((pred: any) => (
+                <div key={pred.id} className="card bg-zinc-900 border-zinc-800/50 p-6 hover:border-zinc-700 transition-colors">
+                  <div className="flex items-center justify-between mb-6">
+                    <h4 className="font-black text-white italic tracking-tight text-sm uppercase">{pred.question}</h4>
+                    <Users className="w-4 h-4 text-zinc-700" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {pred.options.map((opt: string) => (
+                      <button 
+                        key={opt}
+                        onClick={() => {
+                          setSelectedWinner(opt);
+                          setSelectedPredictionId(pred.id);
+                        }}
+                        className={`p-4 rounded-xl border transition-all flex items-center justify-between group ${selectedWinner === opt && selectedPredictionId === pred.id ? "bg-primary border-primary" : "bg-black border-zinc-800 hover:border-primary/40"}`}
+                      >
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${selectedWinner === opt && selectedPredictionId === pred.id ? "text-black" : "text-white"}`}>
+                          {opt}
+                        </span>
+                        <span className={`text-[8px] font-black px-2 py-1 rounded ${selectedWinner === opt && selectedPredictionId === pred.id ? "bg-black/20 text-black" : "bg-primary/10 text-primary"}`}>
+                          1.85x
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-20 bg-zinc-950 rounded-2xl border border-zinc-900">
+                <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest">No predictions generated yet.</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Prediction Input Box */}
+        {/* Betting Panel */}
         <div className="lg:col-span-1">
           <div className="card p-6 bg-zinc-900 border-primary/20 sticky top-24">
             <h3 className="text-lg font-black text-primary mb-6 flex items-center gap-2 italic uppercase tracking-tighter">
-              <TrendingUp className="w-4 h-4" /> Place Your Play
+              <TrendingUp className="w-4 h-4" /> Place Play
             </h3>
 
             <div className="space-y-6">
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Points Entry</label>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Points Entry</label>
                   <span className="text-xs font-black text-primary">{betAmount.toLocaleString()} PTS</span>
                 </div>
                 <input 
                   type="range" 
                   min="100" 
-                  max="10000" 
+                  max="5000" 
                   step="100"
                   value={betAmount}
                   onChange={(e) => setBetAmount(parseInt(e.target.value))}
-                  className="w-full accent-primary bg-zinc-800 h-2 rounded-lg"
+                  className="w-full accent-primary bg-zinc-800 h-1 rounded-lg"
                 />
-                <div className="grid grid-cols-4 gap-2 mt-4">
-                  {[500, 1000, 2500, 5000].map((amt) => (
-                    <button 
-                      key={amt} 
-                      onClick={() => setBetAmount(amt)}
-                      className="text-[10px] font-black border border-zinc-800 hover:border-primary/50 text-zinc-400 hover:text-primary p-1 rounded transition-all"
-                    >
-                      {amt >= 1000 ? `${amt/1000}k` : amt}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div className="bg-black/40 p-4 rounded-xl border border-zinc-800/50 space-y-3">
                 <div className="flex justify-between text-[10px] font-bold">
-                  <span className="text-zinc-500 uppercase">Est. Payout</span>
-                  <span className="text-white">{(betAmount * (selectedWinner === "CSK" ? 1.85 : 2.10)).toLocaleString()} PTS</span>
+                  <span className="text-zinc-500 uppercase">Selection</span>
+                  <span className="text-primary truncate ml-2">{selectedWinner || 'None'}</span>
                 </div>
                 <div className="flex justify-between text-[10px] font-bold">
-                  <span className="text-zinc-500 uppercase">Balance After</span>
-                  <span className="text-zinc-400">{(10000 - betAmount).toLocaleString()} PTS</span>
+                  <span className="text-zinc-500 uppercase">Est. Payout</span>
+                  <span className="text-white">{(betAmount * 1.85).toLocaleString()} PTS</span>
                 </div>
               </div>
 
               <button 
-                disabled={!selectedWinner || loading}
-                onClick={() => handlePredict("Match Winner")}
-                className="btn-primary w-full py-4 text-sm tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
+                disabled={!selectedWinner || submitting}
+                onClick={handlePredict}
+                className="btn-primary w-full py-4 text-xs font-black tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
-                {loading ? <span className="animate-spin text-lg">◌</span> : (
-                  <>
-                    CONFIRM PREDICTION
-                    <CheckCircle2 className="w-4 h-4 hidden group-hover:block" />
-                  </>
-                )}
+                {submitting ? <span className="animate-spin">◌</span> : "CONFIRM PREDICTION"}
               </button>
             </div>
-
-            <p className="mt-6 text-[8px] text-zinc-600 text-center uppercase tracking-widest font-bold">
-              Predict responsibly. Points are non-redeemable. 18+ Only.
-            </p>
           </div>
         </div>
       </div>
