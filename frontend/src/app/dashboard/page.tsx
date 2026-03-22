@@ -1,6 +1,6 @@
-"use client";
-
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import api from "@/lib/api";
 import { 
   Trophy, 
@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchMatches = async () => {
