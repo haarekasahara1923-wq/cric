@@ -21,8 +21,8 @@ export default function LoginPage() {
       
       localStorage.setItem("token", access_token);
       localStorage.setItem("user_role", user.role);
-      toast.success("Login successful!");
-      router.push("/dashboard");
+      toast.success(user.role === 'ADMIN' ? "Admin Login Detected" : "Login successful!");
+      router.push(user.role === 'ADMIN' ? "/admin" : "/dashboard");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Invalid credentials");
     } finally {

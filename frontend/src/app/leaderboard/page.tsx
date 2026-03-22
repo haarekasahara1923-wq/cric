@@ -128,7 +128,7 @@ export default function LeaderboardPage() {
                   <p className="text-[10px] font-bold text-text-muted uppercase">Keep predicting to reach top 100</p>
                </div>
             </div>
-            <button className="px-6 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] font-black uppercase text-primary hover:bg-zinc-800 transition-all">My Stats</button>
+            <button onClick={() => router.push('/profile')} className="px-6 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] font-black uppercase text-primary hover:bg-zinc-800 hover:scale-105 transition-all cursor-pointer">My Stats</button>
         </div>
       </div>
     </div>

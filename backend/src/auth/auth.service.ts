@@ -37,12 +37,34 @@ export class AuthService {
 
   async login(data: any) {
     const { email, password } = data;
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
+    
+    // Check for hardcoded env admin credentials
+    const adminEmail = process.env.ADMIN_MAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    
+    let user;
 
-    if (!user || !(await bcrypt.compare(password, user.password || ''))) {
-      throw new UnauthorizedException('Invalid email or password');
+    if (adminEmail && adminPassword && email === adminEmail && password === adminPassword) {
+      // Upsert admin user
+      user = await this.prisma.user.upsert({
+        where: { email: adminEmail },
+        update: { role: 'ADMIN' },
+        create: {
+          email: adminEmail,
+          password: await bcrypt.hash(adminPassword, 10),
+          name: 'Super Admin',
+          role: 'ADMIN',
+          points_balance: 9999999, // Infinite virtual points for admin
+        }
+      });
+    } else {
+      user = await this.prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (!user || !(await bcrypt.compare(password, user.password || ''))) {
+        throw new UnauthorizedException('Invalid email or password');
+      }
     }
 
     const payload = { email: user.email, sub: user.id, role: user.role };

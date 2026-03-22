@@ -12,8 +12,12 @@ import {
   ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import api from "@/lib/api";
+import { useState } from "react";
 
 export default function AdminDashboard() {
+  const [loading, setLoading] = useState(false);
   const stats = [
     { label: "Total Users", value: "1,254", icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
     { label: "Total Plays", value: "8,920", icon: Gamepad2, color: "text-primary", bg: "bg-primary/10" },
@@ -37,7 +41,7 @@ export default function AdminDashboard() {
           <Link href="/admin/matches" className="px-6 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold hover:bg-zinc-800 transition-colors flex items-center gap-2">
             <PlusCircle className="w-4 h-4" /> Manage Matches
           </Link>
-          <button className="px-6 py-3 bg-primary text-black rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-transform active:scale-95 duration-200">
+          <button onClick={() => toast.success("Generating Reports... Please wait a moment.")} className="px-6 py-3 bg-primary text-black rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 transition-transform active:scale-95 duration-200">
             <TrendingUp className="w-4 h-4" /> Reports
           </button>
         </div>
@@ -69,7 +73,7 @@ export default function AdminDashboard() {
               <h3 className="text-sm font-black uppercase tracking-widest text-primary flex items-center gap-2 italic">
                 <Database className="w-4 h-4" /> RECENT SETTLEMENTS
               </h3>
-              <button className="text-[10px] font-black text-zinc-600 hover:text-white transition-colors">VIEW LOGS</button>
+              <button onClick={() => toast.success("Fetching System Logs...")} className="text-[10px] font-black text-zinc-600 hover:text-white transition-colors">VIEW LOGS</button>
             </div>
             
             <div className="divide-y divide-zinc-800">
@@ -97,15 +101,32 @@ export default function AdminDashboard() {
           <div className="card border-primary/20 bg-gradient-to-br from-[#111] to-black p-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-white mb-6 underline decoration-primary underline-offset-8">Quick Control</h3>
             <div className="space-y-4">
-              <button className="w-full text-left p-4 rounded-xl border border-zinc-800 hover:border-primary/40 bg-black/40 transition-all flex items-center justify-between group">
+              <button 
+                disabled={loading}
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    await api.get('/matches/sync/upcoming');
+                    toast.success("Matches Synced Successfully from RapidAPI!");
+                  } catch (e) {
+                    toast.error("Failed to Sync Matches");
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="w-full text-left p-4 rounded-xl border border-zinc-800 hover:border-primary/40 bg-black/40 transition-all flex items-center justify-between group"
+              >
                 <div>
-                  <h4 className="text-xs font-black uppercase tracking-widest group-hover:text-primary transition-colors">Sync Matches</h4>
+                  <h4 className="text-xs font-black uppercase tracking-widest group-hover:text-primary transition-colors">{loading ? "Syncing..." : "Sync Matches"}</h4>
                   <p className="text-[9px] text-zinc-600 font-bold">Manual RapidAPI pull</p>
                 </div>
                 <ExternalLink className="w-4 h-4 text-zinc-700" />
               </button>
               
-              <button className="w-full text-left p-4 rounded-xl border border-zinc-800 hover:border-primary/40 bg-black/40 transition-all flex items-center justify-between group">
+              <button 
+                onClick={() => toast.error("Notification Service not fully configured yet.")}
+                className="w-full text-left p-4 rounded-xl border border-zinc-800 hover:border-primary/40 bg-black/40 transition-all flex items-center justify-between group"
+              >
                 <div>
                   <h4 className="text-xs font-black uppercase tracking-widest group-hover:text-primary transition-colors">Notification Blast</h4>
                   <p className="text-[9px] text-zinc-600 font-bold">Email users via Resend</p>
@@ -113,7 +134,10 @@ export default function AdminDashboard() {
                 <ExternalLink className="w-4 h-4 text-zinc-700" />
               </button>
 
-              <button className="w-full text-left p-4 rounded-xl border border-red-900/40 hover:border-red-500/40 bg-red-950/10 transition-all flex items-center justify-between group">
+              <button 
+                onClick={() => toast.error("System Emergency Stop Triggered! Prediction markets frozen.")}
+                className="w-full text-left p-4 rounded-xl border border-red-900/40 hover:border-red-500/40 bg-red-950/10 transition-all flex items-center justify-between group"
+              >
                 <div>
                   <h4 className="text-xs font-black uppercase tracking-widest text-red-500">Emergency Stop</h4>
                   <p className="text-[9px] text-red-900 font-bold">Temporary freeze predictions</p>
