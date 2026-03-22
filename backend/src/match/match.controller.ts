@@ -21,4 +21,13 @@ export class MatchController {
     await this.matchService.syncUpcomingMatches();
     return { message: 'Upcoming IPL matches sync triggered' };
   }
+
+  @Get('sync/predictions')
+  async syncAllPredictions() {
+    const matches = await this.matchService.getMatches();
+    for (const match of matches) {
+      await this.matchService.generateMatchPredictions(match.id);
+    }
+    return { message: 'Predictions generation triggered for all matches' };
+  }
 }
