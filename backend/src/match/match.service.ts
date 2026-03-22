@@ -111,23 +111,33 @@ export class MatchService implements OnModuleInit {
     const defaultPredictions = [
       {
         type: 'MATCH_WINNER',
-        question: `Who will win between ${match.team_a} and ${match.team_b}?`,
+        question: `Match Winner: ${match.team_a} vs ${match.team_b}`,
         options: [match.team_a, match.team_b],
       },
       {
         type: 'TOTAL_SIXES',
-        question: 'Total sixes in this match will be?',
+        question: 'Total Match Sixes (Under/Over 12.5)',
         options: ['Under 12.5', 'Over 12.5'],
       },
       {
+        type: 'TOTAL_FOURS',
+        question: 'Total Match Fours (Under/Over 28.5)',
+        options: ['Under 28.5', 'Over 28.5'],
+      },
+      {
+        type: 'SESSION_RUNS_6',
+        question: '1st Innings 6 Over Session Runs',
+        options: ['Under 48.5', 'Over 48.5'],
+      },
+      {
         type: 'TOSS_WINNER',
-        question: 'Which team will win the toss?',
+        question: 'Who will win the Toss?',
         options: [match.team_a, match.team_b],
       },
       {
-        type: 'HIGHEST_STRIKE_RATE',
-        question: 'Will any player have a strike rate over 200?',
-        options: ['Yes', 'No'],
+        type: 'FIRST_WICKET_FALL',
+        question: '1st Wicket Fall Over (Under/Over 3.5)',
+        options: ['Under 3.5', 'Over 3.5'],
       }
     ];
 

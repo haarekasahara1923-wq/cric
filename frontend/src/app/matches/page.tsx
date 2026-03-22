@@ -3,16 +3,30 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { 
-  Zap, 
   ChevronLeft,
-  Calendar,
-  Search
+  Search,
+  Zap,
+  ChevronRight,
+  Menu,
+  X,
+  LayoutDashboard,
+  Activity,
+  Trophy,
+  CircleUser,
+  ShieldCheck,
+  LogOut,
+  Bell
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function MatchesPage() {
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -28,90 +42,154 @@ export default function MatchesPage() {
     fetchMatches();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    toast.success("Logged out successfully");
+    router.push("/auth/login");
+  };
+
+  const navLinks = [
+    { name: "Exchange", icon: LayoutDashboard, href: "/dashboard" },
+    { name: "Live Matches", icon: Activity, href: "/matches" },
+    { name: "Leaderboard", icon: Trophy, href: "/leaderboard" },
+    { name: "My Profile", icon: CircleUser, href: "/profile" },
+    { name: "Admin Panel", icon: ShieldCheck, href: "/admin", admin: true },
+  ];
+
   return (
-    <div className="min-h-screen bg-black text-white p-6 md:p-10">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-          <div>
-            <Link href="/dashboard" className="flex items-center gap-2 text-primary text-xs font-black uppercase tracking-widest mb-4 hover:underline">
-              <ChevronLeft className="w-4 h-4" /> Back to Dashboard
-            </Link>
-            <h1 className="text-4xl font-black italic tracking-tighter flex items-center gap-4">
-              <div className="w-3 h-10 bg-primary rounded-full"></div>
-              ALL MATCHES
-            </h1>
-          </div>
-          
-          <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Search teams..." 
-              className="bg-zinc-900 border border-zinc-800 rounded-xl pl-12 pr-6 py-3 text-sm focus:border-primary outline-none transition-all w-full md:w-80"
-            />
-          </div>
+    <div className="flex flex-col min-h-screen bg-[#0D0D0D]">
+      {/* Satyam77 Header */}
+      <header className="h-16 bg-[#1A1A1A] border-b border-[#2A2A2A] fixed top-0 w-full z-50 flex items-center justify-between px-6">
+        <div className="flex items-center gap-6">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-text-muted hover:text-white transition-colors">
+            {sidebarOpen ? <X /> : <Menu />}
+          </button>
+          <h1 className="text-2xl font-black text-primary italic tracking-tighter cursor-pointer" onClick={() => router.push('/dashboard')}>
+            CRIC<span className="text-white">BET</span>
+          </h1>
         </div>
 
-        {/* Categories */}
-        <div className="flex gap-4 mb-10 overflow-x-auto pb-2 scrollbar-hide">
-          <button className="px-6 py-2 bg-primary text-black font-black text-xs rounded-full uppercase tracking-widest">Upcoming</button>
-          <button className="px-6 py-2 bg-zinc-900 text-zinc-500 font-bold text-xs rounded-full uppercase tracking-widest hover:text-white transition-colors">Live</button>
-          <button className="px-6 py-2 bg-zinc-900 text-zinc-500 font-bold text-xs rounded-full uppercase tracking-widest hover:text-white transition-colors">Completed</button>
-        </div>
-
-        {/* Content */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-48 bg-zinc-900/50 rounded-2xl animate-pulse border border-zinc-800" />
-            ))}
+        <div className="flex items-center gap-4">
+          <div className="hidden md:flex flex-col items-end px-4 border-r border-[#2A2A2A]">
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Balance</span>
+            <span className="text-primary font-black text-sm">125,450 <span className="text-[10px]">PTS</span></span>
           </div>
-        ) : matches.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {matches.map((match) => (
-              <div key={match.id} className="card p-0 flex flex-col group border-zinc-800 hover:border-primary/40 relative overflow-hidden">
-                <div className="p-8 flex items-center justify-between relative z-10">
-                  <div className="flex flex-col items-center gap-4 flex-1">
-                    <img src={match.team_a_img || 'https://flagsapi.com/IN/flat/64.png'} alt={match.team_a} className="w-16 h-16 object-contain" />
-                    <span className="font-black text-white text-lg tracking-tighter italic">{match.team_a}</span>
-                  </div>
-                  
-                  <div className="flex flex-col items-center flex-1 px-4">
-                    <div className="text-[10px] bg-primary/10 text-primary border border-primary/20 font-black px-4 py-1 rounded-full mb-4 uppercase tracking-tighter">
-                      VS
-                    </div>
-                    <span className="text-zinc-500 text-[10px] font-bold text-center uppercase tracking-tighter flex items-center gap-2">
-                      <Calendar className="w-3 h-3" /> {new Date(match.start_time).toLocaleDateString()}
-                    </span>
-                  </div>
+          <button className="p-2 text-text-muted hover:text-white transition-colors">
+            <Bell className="w-5 h-5" />
+          </button>
+          <div className="w-10 h-10 rounded-full bg-surface-light border border-border flex items-center justify-center text-primary font-black cursor-pointer">
+            AD
+          </div>
+        </div>
+      </header>
 
-                  <div className="flex flex-col items-center gap-4 flex-1">
-                    <img src={match.team_b_img || 'https://flagsapi.com/IN/flat/64.png'} alt={match.team_b} className="w-16 h-16 object-contain" />
-                    <span className="font-black text-white text-lg tracking-tighter italic">{match.team_b}</span>
-                  </div>
-                </div>
-                
-                <div className="px-8 py-4 bg-white/5 border-t border-zinc-800 flex items-center justify-between mt-auto">
-                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-primary" /> {match.venue || 'TBA'}
-                  </span>
-                  <Link href={`/matches/${match.id}`} className="bg-primary hover:bg-white text-black font-black text-[10px] px-8 py-2.5 rounded-lg transition-all uppercase tracking-widest shadow-lg shadow-primary/20">
-                    PREDICT NOW
-                  </Link>
-                </div>
+      <div className="flex pt-16 flex-1">
+        {/* Sidebar */}
+        <aside className={`${sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 bg-[#1A1A1A] border-r border-[#2A2A2A] fixed h-full z-40`}>
+          <div className="p-4">
+            <nav className="space-y-1">
+              {navLinks.map((link) => (
+                <Link 
+                  key={link.name} 
+                  href={link.href}
+                  className={`sidebar-link ${pathname === link.href ? 'active' : ''} ${link.admin ? 'border border-primary/20 mt-4' : ''}`}
+                >
+                  <link.icon className="w-4 h-4" />
+                  <span>{link.name}</span>
+                </Link>
+              ))}
+            </nav>
+            <button 
+              onClick={handleLogout}
+              className="sidebar-link text-red-500 hover:bg-red-500/10 mt-20 w-full"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className={`flex-1 ${sidebarOpen ? 'ml-64' : 'ml-0'} transition-all duration-300 p-8`}>
+          <div className="max-w-6xl mx-auto">
+            {/* Page Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+              <div>
+                <h2 className="text-3xl font-black italic tracking-tighter text-white uppercase flex items-center gap-4">
+                   <div className="w-2 h-10 bg-primary rounded-full"></div>
+                   IN-PLAY & UPCOMING
+                </h2>
+                <p className="text-[10px] text-text-muted font-bold tracking-widest uppercase mt-2">Latest cricket fixtures available for exchange</p>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-40 bg-zinc-950 rounded-3xl border-2 border-dashed border-zinc-900">
-            <div className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Calendar className="w-10 h-10 text-zinc-700" />
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted group-focus-within:text-primary transition-colors" />
+                <input 
+                  type="text" 
+                  placeholder="Search Event..." 
+                  className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl pl-12 pr-6 py-3 text-xs focus:border-primary outline-none transition-all w-full md:w-80"
+                />
+              </div>
             </div>
-            <h3 className="text-zinc-500 font-black uppercase tracking-widest">No matches available</h3>
-            <p className="text-zinc-700 text-xs mt-2 uppercase font-bold tracking-tighter">Matches will appear once synced with the system.</p>
+
+            {/* Categories */}
+            <div className="flex gap-2 mb-8 bg-[#1A1A1A] p-1 rounded-lg border border-[#2A2A2A] w-fit">
+              <button className="px-8 py-2 bg-primary text-black font-black text-[10px] rounded-md uppercase">Cricket</button>
+              <button className="px-8 py-2 text-text-muted font-bold text-[10px] hover:text-white transition-all uppercase">Football</button>
+              <button className="px-8 py-2 text-text-muted font-bold text-[10px] hover:text-white transition-all uppercase">Tennis</button>
+            </div>
+
+            {/* Matches List */}
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-[#1A1A1A] rounded-xl animate-pulse" />)}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                 {matches.map((match) => (
+                    <div key={match.id} className="card bg-[#1A1A1A] border-[#2A2A2A] hover:border-primary/30 transition-all overflow-hidden">
+                       <div className="flex flex-col md:flex-row items-center">
+                          {/* Event Name */}
+                          <div className="p-5 flex-1 flex items-center gap-6 w-full md:w-auto">
+                             <div className="flex flex-col items-center">
+                                <span className="text-[10px] font-black text-zinc-600 block">{new Date(match.start_time).toLocaleDateString([], { day: '2-digit', month: 'short' })}</span>
+                                <span className="text-xs font-black text-white">{new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                             </div>
+                             <div className="h-10 w-[1px] bg-zinc-800 hidden md:block" />
+                             <div className="flex-1">
+                                <Link href={`/matches/${match.id}`} className="text-sm font-black text-white hover:text-primary transition-colors uppercase tracking-tight">
+                                   {match.team_a} v {match.team_b}
+                                </Link>
+                                <div className="flex items-center gap-2 mt-1">
+                                   <Zap className="w-3 h-3 text-primary animate-pulse" />
+                                   <span className="text-[9px] font-bold text-zinc-500 uppercase">{match.venue}</span>
+                                </div>
+                             </div>
+                          </div>
+
+                          {/* Odds Panel */}
+                          <div className="bg-[#111] p-4 flex gap-2 border-l border-[#2A2A2A] w-full md:w-auto justify-end">
+                             {/* Back/Lay for Team 1 */}
+                             <div className="flex gap-1">
+                                <div className="odds-box-back" onClick={() => router.push(`/matches/${match.id}`)}>1.88</div>
+                                <div className="odds-box-lay" onClick={() => router.push(`/matches/${match.id}`)}>1.90</div>
+                             </div>
+                             {/* Back/Lay for Team 2 */}
+                             <div className="flex gap-1 ml-4">
+                                <div className="odds-box-back" onClick={() => router.push(`/matches/${match.id}`)}>2.05</div>
+                                <div className="odds-box-lay" onClick={() => router.push(`/matches/${match.id}`)}>2.08</div>
+                             </div>
+                             
+                             <Link href={`/matches/${match.id}`} className="ml-4 p-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:bg-zinc-800 transition-all group">
+                                <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-primary" />
+                             </Link>
+                          </div>
+                       </div>
+                    </div>
+                 ))}
+              </div>
+            )}
           </div>
-        )}
+        </main>
       </div>
     </div>
   );
