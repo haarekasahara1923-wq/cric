@@ -5,13 +5,13 @@ import { AuthService } from './auth.service';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('send-otp')
-  async sendOtp(@Body('email') email: string) {
-    return this.authService.sendOtp(email);
+  @Post('signup')
+  async signup(@Body() data: any) {
+    return this.authService.signup(data);
   }
 
-  @Post('verify-otp')
-  async verifyOtp(@Body('email') email: string, @Body('otp') otp: string) {
-    return this.authService.verifyOtp(email, otp);
+  @Post('login')
+  async login(@Body() data: any) {
+    return this.authService.login(data);
   }
 }
