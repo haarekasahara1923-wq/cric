@@ -13,7 +13,12 @@ export class LeaderboardService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    this.redis = new Redis(this.configService.get('REDIS_URL'));
+    const redisUrl = this.configService.get('REDIS_URL') || this.configService.get('REDIS_PUBLIC_REDIS_URL');
+    if (redisUrl) {
+      this.redis = new Redis(redisUrl);
+    } else {
+      console.error('❌ REDIS_URL or REDIS_PUBLIC_REDIS_URL is missing!');
+    }
   }
 
   async updateScore(userId: string, points: number) {
