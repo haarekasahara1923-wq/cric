@@ -83,6 +83,7 @@ model Prediction {
   match_id        String
   match           Match       @relation(fields: [match_id], references: [id])
   type            String      // e.g., "MATCH_WINNER", "TOSS_WINNER"
+  category        String      @default("EXCHANGE") // "EXCHANGE", "BOOKMAKER", "FANCY"
   question        String
   options         Json        // Array of options with values
   odds            Json?       // Dynamic odds { "Team A": { back: 1.85, lay: 1.87 } }

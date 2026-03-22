@@ -26,6 +26,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
   const [selectedType, setSelectedType] = useState<'BACK' | 'LAY' | null>(null);
   const [selectedOdds, setSelectedOdds] = useState<number | null>(null);
   const [selectedPredictionId, setSelectedPredictionId] = useState<string | null>(null);
+  const [marketTab, setMarketTab] = useState('EXCHANGE');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [userData, setUserData] = useState<any>(null);
@@ -138,14 +139,22 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
 
           {/* Market Tabs */}
           <div className="flex gap-2 bg-[#1A1A1A] p-1.5 rounded-xl border border-[#2A2A2A] w-fit">
-             <button className="px-6 py-2.5 bg-primary text-black font-black text-[10px] rounded-lg shadow-lg shadow-primary/20 uppercase tracking-widest transition-all">Exchange</button>
-             <button className="px-6 py-2.5 text-text-muted font-bold text-[10px] hover:text-white transition-all uppercase tracking-widest">Bookmaker</button>
-             <button className="px-6 py-2.5 text-text-muted font-bold text-[10px] hover:text-white transition-all uppercase tracking-widest">Fancy</button>
+             {['EXCHANGE', 'BOOKMAKER', 'FANCY'].map((cat) => (
+               <button 
+                 key={cat}
+                 onClick={() => setMarketTab(cat)}
+                 className={`px-6 py-2.5 font-black text-[10px] rounded-lg uppercase tracking-widest transition-all ${marketTab === cat ? 'bg-primary text-black shadow-lg shadow-primary/20' : 'text-text-muted hover:text-white'}`}
+               >
+                 {cat}
+               </button>
+             ))}
           </div>
 
           {/* Dynamic Markets List */}
           <div className="space-y-3">
-            {match.predictions?.map((pred: any) => {
+            {match.predictions
+              ?.filter((p: any) => p.category === marketTab)
+              .map((pred: any) => {
               const odds = (pred.odds as any) || {};
               return (
                 <div key={pred.id} className="card bg-[#1A1A1A] border-[#2A2A2A] overflow-hidden group hover:border-[#333]">

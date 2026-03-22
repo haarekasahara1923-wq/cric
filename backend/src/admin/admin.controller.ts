@@ -40,6 +40,7 @@ export class AdminController {
       data: {
         match_id: data.match_id,
         type: data.type,
+        category: data.category || 'EXCHANGE',
         question: data.question,
         options: data.options,
         lock_time: new Date(data.lock_time),
@@ -52,11 +53,30 @@ export class AdminController {
     return this.settlementService.settleMatch(matchId, results);
   }
 
+  @Get('matches')
+  async getAllMatches() {
+    return this.prisma.match.findMany({
+      orderBy: { start_time: 'desc' },
+      include: {
+        predictions: true
+      }
+    });
+  }
+
   @Get('users')
   async getAllUsers() {
     return this.prisma.user.findMany({
       orderBy: { created_at: 'desc' },
-      take: 50
+      take: 50,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        points_balance: true,
+        level: true,
+        role: true,
+        created_at: true
+      }
     });
   }
 }

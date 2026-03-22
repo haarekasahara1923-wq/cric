@@ -60,6 +60,7 @@ export default function Dashboard() {
   const navLinks = [
     { name: "Exchange", icon: LayoutDashboard, href: "/dashboard" },
     { name: "Live Matches", icon: Activity, href: "/matches" },
+    { name: "My Wallet", icon: Wallet, href: "/wallet" },
     { name: "Leaderboard", icon: Trophy, href: "/leaderboard" },
     { name: "My Profile", icon: CircleUser, href: "/profile" },
     { name: "Admin Panel", icon: ShieldCheck, href: "/admin", admin: true },

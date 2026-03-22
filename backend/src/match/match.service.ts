@@ -140,33 +140,45 @@ export class MatchService implements OnModuleInit {
     const defaultPredictions = [
       {
         type: 'MATCH_WINNER',
+        category: 'EXCHANGE',
         question: `Match Winner: ${match.team_a} vs ${match.team_b}`,
         options: [match.team_a, match.team_b],
       },
       {
+        type: 'TOSS_WINNER',
+        category: 'EXCHANGE',
+        question: 'Who will win the Toss?',
+        options: [match.team_a, match.team_b],
+      },
+      {
         type: 'TOTAL_SIXES',
-        question: 'Total Match Sixes (Under/Over 12.5)',
-        options: ['Under 12.5', 'Over 12.5'],
+        category: 'FANCY',
+        question: 'Total Match Sixes (Under/Over 14.5)',
+        options: ['Under 14.5', 'Over 14.5'],
       },
       {
         type: 'TOTAL_FOURS',
+        category: 'FANCY',
         question: 'Total Match Fours (Under/Over 28.5)',
         options: ['Under 28.5', 'Over 28.5'],
       },
       {
         type: 'SESSION_RUNS_6',
+        category: 'FANCY',
         question: '1st Innings 6 Over Session Runs',
-        options: ['Under 48.5', 'Over 48.5'],
-      },
-      {
-        type: 'TOSS_WINNER',
-        question: 'Who will win the Toss?',
-        options: [match.team_a, match.team_b],
+        options: ['Under 49.5', 'Over 49.5'],
       },
       {
         type: 'FIRST_WICKET_FALL',
+        category: 'FANCY',
         question: '1st Wicket Fall Over (Under/Over 3.5)',
         options: ['Under 3.5', 'Over 3.5'],
+      },
+      {
+        type: 'TOP_BATSMAN',
+        category: 'BOOKMAKER',
+        question: 'Who will be the top batsman?',
+        options: ['Player 1', 'Player 2', 'Player 3'], // In a real app, populate from squad
       }
     ];
 
@@ -184,6 +196,7 @@ export class MatchService implements OnModuleInit {
         data: {
           match_id: matchId,
           type: pred.type,
+          category: pred.category,
           question: pred.question,
           options: pred.options,
           odds: initialOdds,
