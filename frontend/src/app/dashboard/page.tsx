@@ -22,14 +22,18 @@ export default function Dashboard() {
   const [level] = useState(2);
   const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMatches = async () => {
       try {
+        setError(null);
+        setLoading(true);
         const response = await api.get('/matches');
         setUpcomingMatches(response.data);
-      } catch (error) {
-        console.error('Failed to fetch matches:', error);
+      } catch (err: any) {
+        console.error('Failed to fetch matches:', err);
+        setError(err.message || 'Unknown fetching error');
       } finally {
         setLoading(false);
       }
@@ -116,18 +120,18 @@ export default function Dashboard() {
               <p className="mt-2 text-[10px] text-zinc-600 uppercase font-black tracking-tighter">650 / 1000 XP to GOLD</p>
             </div>
 
-            <div className="card bg-gradient-to-br from-primary to-accent p-6 border-none relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-20 text-white group-hover:scale-110 transition-transform duration-500">
-                <Wallet className="w-32 h-32" />
-              </div>
-              <div className="relative z-10 flex flex-col h-full justify-between">
-                <div>
-                  <p className="text-black/60 text-sm font-bold uppercase tracking-widest mb-1">Available Points</p>
-                  <h3 className="text-4xl font-black text-black">{balance.toLocaleString()}</h3>
+            <div className="card bg-zinc-900 border-zinc-800 p-6 flex flex-col justify-between">
+              <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-2">System Status</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className="text-zinc-500">API Endpoint:</span>
+                  <span className="text-white truncate max-w-[100px]">{process.env.NEXT_PUBLIC_API_URL ? 'Configured' : 'Localhost'}</span>
                 </div>
-                <button className="mt-4 bg-black text-primary text-xs font-bold py-2 rounded-lg hover:bg-zinc-800 transition-colors">
-                  VIEW HISTORY
-                </button>
+                {error && (
+                  <div className="p-2 bg-red-500/10 border border-red-500/20 rounded text-[9px] text-red-500 font-bold uppercase overflow-hidden">
+                    Error: {error}
+                  </div>
+                )}
               </div>
             </div>
           </div>
