@@ -41,8 +41,6 @@ export class MatchService implements OnModuleInit {
       let iplMatchesFound = 0;
 
       for (const group of typeMatches) {
-        // Filter for Indian Premier League
-        if (group.matchType === 'IPL' || group.matchType?.includes('Premier League')) {
           const seriesMatches = group.seriesMatches || [];
           
           for (const series of seriesMatches) {
