@@ -67,7 +67,7 @@ export class MatchService implements OnModuleInit {
               if (matchInfo.state === 'Complete') status = MatchStatus.COMPLETED;
 
               // Upsert into our DB
-              await this.prisma.match.upsert({
+              const dbMatch = await this.prisma.match.upsert({
                 where: { api_match_id: apiMatchId },
                 update: {
                   status,
@@ -78,24 +78,72 @@ export class MatchService implements OnModuleInit {
                   api_match_id: apiMatchId,
                   team_a: teamA,
                   team_b: teamB,
-                  team_a_img: `https://flagsapi.com/IN/flat/64.png`, // Placeholder if no flag
-                  team_b_img: `https://flagsapi.com/IN/flat/64.png`, // Placeholder
+                  team_a_img: `https://flagsapi.com/IN/flat/64.png`, 
+                  team_b_img: `https://flagsapi.com/IN/flat/64.png`,
                   start_time: startTime,
                   status,
                   venue,
                 }
               });
+
+              // Generate predictions for new matches
+              await this.generateMatchPredictions(dbMatch.id);
           }
         }
       }
 
-      this.logger.log(`✅ Successfully synced ${iplMatchesFound} matches.`);
+      this.logger.log(`✅ Successfully synced matches.`);
     } catch (error) {
       this.logger.error('❌ Failed to sync matches from RapidAPI:', error.message);
-      if (error.response) {
-        this.logger.error('API Error Response:', JSON.stringify(error.response.data));
-      }
     }
+  }
+
+  async generateMatchPredictions(matchId: string) {
+    const match = await this.prisma.match.findUnique({ where: { id: matchId } });
+    if (!match) return;
+
+    const existing = await this.prisma.prediction.findFirst({
+      where: { match_id: matchId }
+    });
+    
+    if (existing) return;
+
+    const defaultPredictions = [
+      {
+        type: 'MATCH_WINNER',
+        question: `Who will win between ${match.team_a} and ${match.team_b}?`,
+        options: [match.team_a, match.team_b],
+      },
+      {
+        type: 'TOTAL_SIXES',
+        question: 'Total sixes in this match will be?',
+        options: ['Under 12.5', 'Over 12.5'],
+      },
+      {
+        type: 'TOSS_WINNER',
+        question: 'Which team will win the toss?',
+        options: [match.team_a, match.team_b],
+      },
+      {
+        type: 'HIGHEST_STRIKE_RATE',
+        question: 'Will any player have a strike rate over 200?',
+        options: ['Yes', 'No'],
+      }
+    ];
+
+    for (const p of defaultPredictions) {
+      await this.prisma.prediction.create({
+        data: {
+          match_id: matchId,
+          type: p.type,
+          question: p.question,
+          options: p.options as any,
+          lock_time: match.start_time,
+        }
+      });
+    }
+    
+    this.logger.log(`✅ Generated 4 default predictions for match ${match.team_a} vs ${match.team_b}`);
   }
 
   async getMatches(status?: string) {

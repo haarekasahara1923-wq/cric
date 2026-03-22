@@ -17,6 +17,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
   const [match, setMatch] = useState<any>(null);
   const [betAmount, setBetAmount] = useState<number>(500);
   const [selectedWinner, setSelectedWinner] = useState<string | null>(null);
+  const [selectedPredictionId, setSelectedPredictionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
