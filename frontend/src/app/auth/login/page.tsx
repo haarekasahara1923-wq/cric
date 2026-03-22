@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import api from "@/lib/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,27 +15,34 @@ export default function LoginPage() {
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Mimic API call
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await api.post("/auth/otp/send", { email });
       setStep(2);
       toast.success("OTP sent to your email!");
-    }, 1500);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Mimic API call
-    setTimeout(() => {
+    try {
+      const response = await api.post("/auth/otp/verify", { email, otp });
+      const { access_token } = response.data;
+      
+      // Store token
+      localStorage.setItem("token", access_token);
+      
+      toast.success("Login successful!");
+      router.push("/dashboard");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Invalid OTP");
+    } finally {
       setLoading(false);
-      if (otp === "123456") {
-        toast.success("Login successful!");
-        router.push("/dashboard");
-      } else {
-        toast.error("Invalid OTP. Try 123456");
-      }
-    }, 1500);
+    }
   };
 
   return (
