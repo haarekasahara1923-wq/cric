@@ -28,7 +28,15 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
   const [selectedPredictionId, setSelectedPredictionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
   const router = useRouter();
+
+  const fetchUserData = async () => {
+    try {
+      const res = await api.get('/auth/me');
+      setUserData(res.data);
+    } catch (e) {}
+  };
 
   // Fetch match data every 5 seconds for live odds
   useEffect(() => {
@@ -44,6 +52,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
     };
 
     fetchMatch();
+    fetchUserData();
     const interval = setInterval(fetchMatch, 5000);
     return () => clearInterval(interval);
   }, [params.id, router, loading]);
@@ -63,8 +72,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
       toast.success(`Order Placed: ${selectedOption} @ ${selectedOdds}`);
       setSelectedOption(null);
       setSelectedType(null);
-      
-      // Refresh points or state if needed
+      fetchUserData(); // Refresh balance
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to place bet");
       setSubmitting(false);
@@ -94,7 +102,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
           </div>
           <div className="flex flex-col items-end">
             <span className="text-[9px] font-bold text-text-muted uppercase tracking-widest leading-none mb-1">Balance</span>
-            <span className="text-primary font-black text-sm leading-none">125,450 <span className="text-[9px]">PTS</span></span>
+            <span className="text-primary font-black text-sm leading-none">{userData?.points_balance?.toLocaleString() || '0'} <span className="text-[9px]">PTS</span></span>
           </div>
         </div>
       </header>

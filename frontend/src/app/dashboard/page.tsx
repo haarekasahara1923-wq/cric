@@ -27,24 +27,29 @@ export default function Dashboard() {
   const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    setUserRole(localStorage.getItem("user_role"));
-    const fetchMatches = async () => {
+    const initDashboard = async () => {
       try {
-        const response = await api.get('/matches');
-        setUpcomingMatches(response.data.slice(0, 5));
-      } catch (error) {
-        console.error('Failed to fetch matches:', error);
+        const [matchRes, userRes] = await Promise.all([
+          api.get('/matches'),
+          api.get('/auth/me')
+        ]);
+        setUpcomingMatches(matchRes.data.slice(0, 5));
+        setUserData(userRes.data);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          router.push('/auth/login');
+        }
       } finally {
         setLoading(false);
       }
     };
-    fetchMatches();
-  }, []);
+    initDashboard();
+  }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -58,7 +63,7 @@ export default function Dashboard() {
     { name: "Leaderboard", icon: Trophy, href: "/leaderboard" },
     { name: "My Profile", icon: CircleUser, href: "/profile" },
     { name: "Admin Panel", icon: ShieldCheck, href: "/admin", admin: true },
-  ].filter(link => !link.admin || userRole === 'ADMIN');
+  ].filter(link => !link.admin || userData?.role === 'ADMIN');
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0D0D0D]">
@@ -76,18 +81,18 @@ export default function Dashboard() {
         <div className="flex items-center gap-4">
           <div className="hidden md:flex flex-col items-end px-4 border-r border-[#2A2A2A]">
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Balance</span>
-            <span className="text-primary font-black text-sm">125,450 <span className="text-[10px]">PTS</span></span>
+            <span className="text-primary font-black text-sm">{userData?.points_balance?.toLocaleString() || '0'} <span className="text-[10px]">PTS</span></span>
           </div>
           <div className="hidden md:flex flex-col items-end px-4 border-r border-[#2A2A2A]">
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Exposure</span>
-            <span className="text-pink-400 font-black text-sm">12,500 <span className="text-[10px]">PTS</span></span>
+            <span className="text-pink-400 font-black text-sm">0 <span className="text-[10px]">PTS</span></span>
           </div>
           <button className="p-2 text-text-muted hover:text-white transition-colors relative">
             <Bell className="w-5 h-5" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full ring-2 ring-[#1A1A1A]"></span>
           </button>
-          <div className="w-10 h-10 rounded-full bg-surface-light border border-border flex items-center justify-center text-primary font-black cursor-pointer hover:border-primary transition-all">
-            AD
+          <div className="w-10 h-10 rounded-full bg-surface-light border border-border flex items-center justify-center text-primary font-black cursor-pointer hover:border-primary transition-all uppercase">
+            {userData?.name?.[0] || userData?.email?.[0] || 'U'}
           </div>
         </div>
       </header>
