@@ -15,4 +15,10 @@ export class MatchController {
   async getMatchById(@Param('id') id: string) {
     return this.matchService.getMatchById(id);
   }
+
+  @Get('sync/upcoming')
+  async syncUpcomingMatches() {
+    await this.matchService.syncUpcomingMatches();
+    return { message: 'Upcoming IPL matches sync triggered' };
+  }
 }
