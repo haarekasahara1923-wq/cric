@@ -36,8 +36,13 @@ export class MatchService implements OnModuleInit {
           'x-rapidapi-host': this.apiHost
         }
       });
-
+      
+      this.logger.log(`🔍 Raw API Response Structure: ${Object.keys(response.data || {}).join(', ')}`);
+      
       const typeMatches = response.data?.typeMatches || [];
+      if (typeMatches.length === 0) {
+        this.logger.warn('⚠️ No matches found in the API response under "typeMatches".');
+      }
       let iplMatchesFound = 0;
 
       for (const group of typeMatches) {
