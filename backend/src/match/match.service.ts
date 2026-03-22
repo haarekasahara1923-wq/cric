@@ -80,13 +80,11 @@ export class MatchService implements OnModuleInit {
                   venue,
                 }
               });
-              iplMatchesFound++;
-            }
           }
         }
       }
 
-      this.logger.log(`✅ Successfully synced ${iplMatchesFound} IPL matches.`);
+      this.logger.log(`✅ Successfully synced ${iplMatchesFound} matches.`);
     } catch (error) {
       this.logger.error('❌ Failed to sync matches from RapidAPI:', error.message);
       if (error.response) {
