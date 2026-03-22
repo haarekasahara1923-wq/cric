@@ -41,6 +41,12 @@ export default function Dashboard() {
     fetchMatches();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    toast.success("Logged out successfully");
+    router.push("/auth/login");
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-black">
       {/* Sidebar - Desktop */}
@@ -65,7 +71,10 @@ export default function Dashboard() {
           </Link>
         </nav>
 
-        <button className="flex items-center gap-3 text-red-500 hover:text-red-400 font-medium p-3 rounded-lg transition-colors mt-auto">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 text-red-500 hover:text-red-400 font-medium p-3 rounded-lg transition-colors mt-auto"
+        >
           <LogOut className="w-5 h-5" /> Logout
         </button>
       </div>
