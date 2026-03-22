@@ -26,10 +26,17 @@ import Link from "next/link";
 export default function Dashboard() {
   const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Closed initially for mobile-first
   const [userData, setUserData] = useState<any>(null);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    // Open sidebar automatically on desktop
+    if (window.innerWidth >= 768) {
+      setSidebarOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     const initDashboard = async () => {
@@ -99,8 +106,8 @@ export default function Dashboard() {
       </header>
 
       <div className="flex pt-16 flex-1">
-        {/* Sidebar - Collapsible */}
-        <aside className={`${sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 bg-[#1A1A1A] border-r border-[#2A2A2A] fixed h-full z-40`}>
+        {/* Sidebar - Collapsible (Fixed overlay on mobile, pushes content on desktop) */}
+        <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transform transition-transform duration-300 bg-[#1A1A1A] border-r border-[#2A2A2A] fixed h-full z-40 w-64`}>
           <div className="p-4">
             <div className="relative mb-8">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
@@ -136,7 +143,7 @@ export default function Dashboard() {
         </aside>
 
         {/* Main Content */}
-        <main className={`flex-1 ${sidebarOpen ? 'ml-64' : 'ml-0'} transition-all duration-300 p-8`}>
+        <main className={`flex-1 transition-all duration-300 p-4 md:p-8 ${sidebarOpen ? 'md:ml-64 ml-0' : 'ml-0'}`}>
           {/* Dashboard Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
             {[

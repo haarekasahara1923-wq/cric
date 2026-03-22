@@ -9,14 +9,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("user_role");
-
-    if (!token || role !== "ADMIN") {
-      router.replace("/auth/login");
-    } else {
-      setAuthorized(true);
-    }
+    const verifyAdmin = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.replace("/auth/login");
+        return;
+      }
+      
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+        const res = await fetch(`${baseUrl}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error("Auth failed");
+        
+        const data = await res.json();
+        if (data.role !== "ADMIN") {
+          throw new Error("Not an admin");
+        }
+        
+        // Strictly valid admin
+        setAuthorized(true);
+      } catch (e) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user_role");
+        router.replace("/auth/login");
+      }
+    };
+    
+    verifyAdmin();
   }, [router]);
 
   if (!authorized) {
