@@ -10,6 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         primary: "#CCF400", // Satyam77 Neon Green
+        "primary-hover": "#B8DB00",
         surface: "#1A1A1A", // Satyam77 Surface
         background: "#0D0D0D", // Deep Black
         border: "#2A2A2A",
