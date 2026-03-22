@@ -36,34 +36,34 @@ export default function Home() {
           <img 
             src="/ipl_hero_bg_1774171334342.png" 
             alt="IPL Action" 
-            className="w-full h-full object-cover scale-105 animate-pulse-slow opacity-60"
+            className="w-full h-full object-cover object-top scale-100 animate-pulse-slow opacity-50 transition-opacity duration-1000"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-[#050505]/20" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-transparent to-[#050505]" />
         </div>
 
-        <div className="container mx-auto px-6 relative z-10 text-center mt-20">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-8 animate-in slide-in-from-bottom duration-700">
-             <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">IPL 2026 LIVE PREDICTION</span>
+        <div className="container mx-auto px-6 relative z-10 text-center mt-32">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/30 rounded-full mb-8 animate-in slide-in-from-bottom duration-700 shadow-[0_0_20px_rgba(255,107,0,0.1)]">
+             <span className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_var(--primary)]" />
+             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary drop-shadow-sm">IPL 2026 LIVE PREDICTION</span>
           </div>
           
-          <h2 className="text-6xl md:text-9xl font-black italic tracking-tighter uppercase mb-6 drop-shadow-2xl">
-            PREDICT <br /> <span className="text-transparent stroke-text italic font-outline-2">DOMINATE</span>
+          <h2 className="text-6xl md:text-9xl font-black italic tracking-tighter uppercase mb-6 drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+            PREDICT <br /> <span className="text-transparent stroke-text italic font-outline-2 drop-shadow-lg">DOMINATE</span>
           </h2>
           
-          <p className="text-zinc-400 text-sm md:text-lg max-w-2xl mx-auto font-medium tracking-wide mb-12 uppercase leading-relaxed">
-            Unleash your cricket IQ on India's most premium <span className="text-white border-b-2 border-primary">virtual prediction</span> hub. 
+          <p className="text-zinc-300 text-sm md:text-lg max-w-2xl mx-auto font-bold tracking-wide mb-12 uppercase leading-relaxed text-shadow-md">
+            Unleash your cricket IQ on India's most premium <span className="text-white border-b-2 border-primary pb-0.5">virtual prediction</span> hub. 
             Real-time analytics, zero risk, infinite glory.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/auth/login" className="group px-10 py-5 bg-primary text-black rounded-2xl font-black uppercase tracking-[0.2em] text-xs flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-primary/40">
+            <Link href="/auth/login" className="group px-10 py-5 bg-primary text-black rounded-2xl font-black uppercase tracking-[0.2em] text-xs flex items-center gap-3 hover:scale-105 active:scale-95 transition-all shadow-[0_10px_40px_-10px_rgba(255,107,0,0.5)] active:shadow-none hover:bg-white hover:text-black">
                Enter Arena <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
-            <button className="px-10 py-5 bg-white/5 border border-white/10 rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-white/10 transition-all">
-               View Leaderboard
-            </button>
+            <Link href="/leaderboard" className="group px-10 py-5 bg-white/5 border border-white/10 rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-white/10 hover:border-white/20 transition-all flex items-center gap-3">
+               View Leaderboard <Trophy size={16} className="text-primary group-hover:scale-110 transition-transform" />
+            </Link>
           </div>
         </div>
 
