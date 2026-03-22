@@ -86,6 +86,17 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
     </div>
   );
 
+  if (!match) return (
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6">
+      <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl text-center">
+        <Activity className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-xl font-black text-white uppercase italic tracking-tighter mb-2">Match Not Found</h2>
+        <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mb-6">This fixture may have been removed or is temporarily unavailable.</p>
+        <Link href="/dashboard" className="px-8 py-3 bg-primary text-black rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-accent transition-all">Back to Dashboard</Link>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[#0D0D0D] text-white">
       {/* Satyam77 Header */}
