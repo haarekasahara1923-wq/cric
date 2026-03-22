@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MatchService } from './match.service';
+import { PredictionService } from './prediction.service';
 import { MatchController } from './match.controller';
 
 @Module({
-  providers: [MatchService],
+  providers: [MatchService, PredictionService],
   controllers: [MatchController],
   exports: [MatchService],
 })

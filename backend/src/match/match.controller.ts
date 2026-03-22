@@ -1,14 +1,29 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
 import { MatchService } from './match.service';
+import { PredictionService } from './prediction.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('matches')
 export class MatchController {
-  constructor(private matchService: MatchService) {}
+  constructor(
+    private matchService: MatchService,
+    private predictionService: PredictionService
+  ) {}
 
   @Get()
   async getMatches(@Query('status') status: string) {
     return this.matchService.getMatches(status);
+  }
+
+  @Get('leaderboard')
+  async getLeaderboard() {
+    return this.predictionService.getLeaderboard();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('bet/place')
+  async placeBet(@Req() req, @Body() body: any) {
+    return this.predictionService.placeBet(req.user.id, body);
   }
 
   @Get(':id')

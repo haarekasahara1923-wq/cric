@@ -17,9 +17,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const response = await api.post("/auth/login", { email, password });
-      const { access_token } = response.data;
+      const { access_token, user } = response.data;
       
       localStorage.setItem("token", access_token);
+      localStorage.setItem("user_role", user.role);
       toast.success("Login successful!");
       router.push("/dashboard");
     } catch (error: any) {

@@ -52,15 +52,21 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
     if (!selectedOption || !selectedPredictionId || !selectedType || !selectedOdds) return;
     setSubmitting(true);
     try {
-      // In real app, send to /predictions/place
-      setTimeout(() => {
-        setSubmitting(false);
-        toast.success(`Bet Placed: ${selectedOption} @ ${selectedOdds} (${selectedType})`);
-        setSelectedOption(null);
-        setSelectedType(null);
-      }, 800);
-    } catch (error) {
-      toast.error("Failed to place bet");
+      await api.post("/matches/bet/place", {
+        predictionId: selectedPredictionId,
+        option: selectedOption,
+        amount: betAmount,
+        type: selectedType
+      });
+      
+      setSubmitting(false);
+      toast.success(`Order Placed: ${selectedOption} @ ${selectedOdds}`);
+      setSelectedOption(null);
+      setSelectedType(null);
+      
+      // Refresh points or state if needed
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to place bet");
       setSubmitting(false);
     }
   };

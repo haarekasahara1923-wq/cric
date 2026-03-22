@@ -27,10 +27,12 @@ export default function Dashboard() {
   const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
+    setUserRole(localStorage.getItem("user_role"));
     const fetchMatches = async () => {
       try {
         const response = await api.get('/matches');
@@ -56,7 +58,7 @@ export default function Dashboard() {
     { name: "Leaderboard", icon: Trophy, href: "/leaderboard" },
     { name: "My Profile", icon: CircleUser, href: "/profile" },
     { name: "Admin Panel", icon: ShieldCheck, href: "/admin", admin: true },
-  ];
+  ].filter(link => !link.admin || userRole === 'ADMIN');
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0D0D0D]">

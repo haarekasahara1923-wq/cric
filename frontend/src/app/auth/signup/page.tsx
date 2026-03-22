@@ -30,8 +30,9 @@ export default function SignupPage() {
         password: formData.password,
       });
       
-      const { access_token } = response.data;
+      const { access_token, user } = response.data;
       localStorage.setItem("token", access_token);
+      localStorage.setItem("user_role", user.role);
       
       toast.success("Account created successfully!");
       router.push("/dashboard");
