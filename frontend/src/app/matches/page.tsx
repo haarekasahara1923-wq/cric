@@ -37,18 +37,24 @@ export default function MatchesPage() {
 
   useEffect(() => {
     const fetchInitialData = async () => {
+      setLoading(true);
+      // Fetch matches (non-auth part)
       try {
-        const [matchesRes, userRes] = await Promise.all([
-          api.get('/matches'),
-          api.get('/auth/me')
-        ]);
+        const matchesRes = await api.get('/matches');
         setMatches(matchesRes.data);
+      } catch (error) {
+        console.error('Failed to fetch matches:', error);
+      }
+      
+      // Fetch user (auth part)
+      try {
+        const userRes = await api.get('/auth/me');
         setUserData(userRes.data);
       } catch (error) {
-        console.error('Failed to fetch data:', error);
-      } finally {
-        setLoading(false);
+        console.log('Skipping user data (not logged in)');
       }
+      
+      setLoading(false);
     };
     fetchInitialData();
   }, []);
