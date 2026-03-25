@@ -27,7 +27,7 @@ export class MatchService implements OnModuleInit {
     this.logger.log('Match Service Initialized');
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron('*/30 * * * * *') // Run every 30 seconds as requested
   async syncUpcomingMatches() {
     this.logger.log('🔄 Syncing matches from CricketData.org...');
     
@@ -44,6 +44,7 @@ export class MatchService implements OnModuleInit {
         const teamB = m.teams[1] || 'Team B';
         const startTime = new Date(m.dateTimeGMT);
         const venue = m.venue || 'TBA';
+        const scorecardInfo = m.score ? JSON.parse(JSON.stringify(m.score)) : null;
         
         let status: MatchStatus = MatchStatus.UPCOMING;
         if (m.matchStarted) status = MatchStatus.LIVE;
@@ -56,6 +57,7 @@ export class MatchService implements OnModuleInit {
             status,
             venue,
             start_time: startTime,
+            scorecard: scorecardInfo,
           },
           create: {
             api_match_id: apiMatchId,
@@ -66,6 +68,7 @@ export class MatchService implements OnModuleInit {
             start_time: startTime,
             status,
             venue,
+            scorecard: scorecardInfo,
           }
         });
 
@@ -284,9 +287,16 @@ export class MatchService implements OnModuleInit {
   }
 
   async getMatches(status?: string) {
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
     return this.prisma.match.findMany({
-      where: status ? { status: status as any } : {},
-      orderBy: { start_time: 'asc' },
+      where: status 
+        ? { status: status as any } 
+        : { start_time: { gte: twoDaysAgo } },
+      orderBy: [
+        { start_time: 'asc' }
+      ],
     });
   }
 

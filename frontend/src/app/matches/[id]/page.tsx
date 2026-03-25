@@ -128,17 +128,25 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
              <div className="flex items-center gap-6 relative z-10 w-full md:w-auto">
                 <div className="text-center w-24">
                    <div className="text-[10px] font-bold text-text-muted uppercase mb-2 truncate">{match.team_a}</div>
-                   <div className="text-2xl font-black italic">-- / -</div>
-                   <div className="text-[10px] text-zinc-600 font-bold uppercase">(0.0)</div>
+                   <div className="text-2xl font-black italic">
+                     {match.scorecard?.[0] ? `${match.scorecard[0].r}/${match.scorecard[0].w}` : '-- / -'}
+                   </div>
+                   <div className="text-[10px] text-zinc-600 font-bold uppercase">
+                     ({match.scorecard?.[0] ? `${match.scorecard[0].o} ov` : '0.0'})
+                   </div>
                 </div>
                 <div className="flex flex-col items-center">
                     <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-black text-primary text-[10px] ring-1 ring-primary/20">VS</div>
-                    <span className="text-[8px] bg-red-500/20 text-red-500 px-2 py-0.5 rounded font-black mt-2 animate-pulse">{match.status}</span>
+                    <span className={`text-[8px] px-2 py-0.5 rounded font-black mt-2 uppercase ${match.status === 'LIVE' ? 'bg-red-500/20 text-red-500 animate-pulse' : 'bg-primary/20 text-primary'}`}>{match.status}</span>
                 </div>
                 <div className="text-center w-24">
                    <div className="text-[10px] font-bold text-text-muted uppercase mb-2 truncate">{match.team_b}</div>
-                   <div className="text-2xl font-black italic">Yet to Bat</div>
-                   <div className="text-[10px] text-zinc-600 font-bold uppercase">(0.0)</div>
+                   <div className="text-2xl font-black italic">
+                     {match.scorecard?.[1] ? `${match.scorecard[1].r}/${match.scorecard[1].w}` : (match.scorecard?.[0] ? 'Yet to Bat' : '-- / -')}
+                   </div>
+                   <div className="text-[10px] text-zinc-600 font-bold uppercase">
+                     ({match.scorecard?.[1] ? `${match.scorecard[1].o} ov` : '0.0'})
+                   </div>
                 </div>
              </div>
              <div className="mt-8 md:mt-0 p-4 bg-black/40 border border-zinc-800 rounded-xl text-center min-w-[140px]">

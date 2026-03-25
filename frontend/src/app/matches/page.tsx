@@ -159,6 +159,7 @@ export default function MatchesPage() {
                              <div className="flex flex-col items-center">
                                 <span className="text-[10px] font-black text-zinc-600 block">{new Date(match.start_time).toLocaleDateString([], { day: '2-digit', month: 'short' })}</span>
                                 <span className="text-xs font-black text-white">{new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                {match.status === 'LIVE' && <span className="text-[8px] bg-red-500/20 text-red-500 px-2 py-0.5 rounded font-black mt-1 animate-pulse tracking-widest uppercase">LIVE</span>}
                              </div>
                              <div className="h-10 w-[1px] bg-zinc-800 hidden md:block" />
                              <div className="flex-1">
@@ -169,6 +170,13 @@ export default function MatchesPage() {
                                    <Zap className="w-3 h-3 text-primary animate-pulse" />
                                    <span className="text-[9px] font-bold text-zinc-500 uppercase">{match.venue}</span>
                                 </div>
+                                {/* Live Scorecard info */}
+                                {match.status === 'LIVE' && match.scorecard && match.scorecard.length > 0 && (
+                                   <div className="mt-2 text-primary font-black text-xs italic bg-primary/10 w-fit px-3 py-1 rounded-md border border-primary/20">
+                                      {match.scorecard[0].title || match.scorecard[0].inning}: {match.scorecard[0].r}/{match.scorecard[0].w} 
+                                      <span className="text-[10px] text-zinc-400 font-bold ml-1">({match.scorecard[0].o} ov)</span>
+                                   </div>
+                                )}
                              </div>
                           </div>
 

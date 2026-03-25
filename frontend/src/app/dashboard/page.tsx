@@ -192,7 +192,17 @@ export default function Dashboard() {
                         </div>
                         <div className="flex flex-col items-end">
                            <span className="text-[10px] font-bold text-zinc-500 mb-1">{new Date(match.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                           <span className="text-[8px] bg-primary/20 text-primary px-2 py-0.5 rounded font-black uppercase">{match.status}</span>
+                           <span className={`text-[8px] px-2 py-0.5 rounded font-black uppercase ${match.status === 'LIVE' ? 'bg-red-500/20 text-red-500 animate-pulse' : 'bg-primary/20 text-primary'}`}>{match.status}</span>
+                           
+                           {/* Live Score Display */}
+                           {match.status === 'LIVE' && match.scorecard && match.scorecard.length > 0 && (
+                             <div className="mt-2 text-right">
+                               <div className="text-sm font-black text-white italic">
+                                 {match.scorecard[0].title || match.scorecard[0].inning}: {match.scorecard[0].r}/{match.scorecard[0].w} 
+                                 <span className="text-[10px] text-zinc-400 font-bold ml-1">({match.scorecard[0].o} ov)</span>
+                               </div>
+                             </div>
+                           )}
                         </div>
                       </div>
 
