@@ -67,6 +67,7 @@ export default function Dashboard() {
   const navLinks = [
     { name: "Exchange", icon: LayoutDashboard, href: "/dashboard" },
     { name: "Live Matches", icon: Activity, href: "/matches" },
+    { name: "Live Scoreboard", icon: Zap, href: "/live" },
     { name: "My Wallet", icon: Wallet, href: "/wallet" },
     { name: "Leaderboard", icon: Trophy, href: "/leaderboard" },
     { name: "My Profile", icon: CircleUser, href: "/profile" },
@@ -87,6 +88,9 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center gap-4">
+          <Link href="/live" className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg text-primary hover:bg-primary/20 transition-all font-black text-[10px] uppercase tracking-widest animate-pulse">
+            <Zap className="w-3 h-3" /> Live Scores
+          </Link>
           <div className="hidden md:flex flex-col items-end px-4 border-r border-[#2A2A2A]">
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Balance</span>
             <span className="text-primary font-black text-sm">{userData?.points_balance?.toLocaleString() || '0'} <span className="text-[10px]">PTS</span></span>
@@ -127,7 +131,7 @@ export default function Dashboard() {
                 >
                   <link.icon className="w-4 h-4" />
                   <span>{link.name}</span>
-                  {link.name === "Exchange" && <span className="ml-auto text-[10px] bg-primary text-black font-black px-1.5 rounded animate-pulse">LIVE</span>}
+                  {(link.name === "Exchange" || link.name === "Live Scoreboard") && <span className="ml-auto text-[10px] bg-primary text-black font-black px-1.5 rounded animate-pulse">LIVE</span>}
                 </Link>
               ))}
             </nav>
@@ -148,14 +152,18 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
             {[
               { label: "Active Bets", val: "24", icon: TrendingUp, color: "text-blue-400" },
-              { label: "In-Play Matches", val: "12", icon: Zap, color: "text-primary" },
+              { label: "Live Scoreboard", val: "TRACK SCORES", icon: Zap, color: "text-primary", href: "/live" },
               { label: "Profit/Loss", val: "+₹2.5k", icon: Trophy, color: "text-green-500" },
               { label: "Rank", val: "#12", icon: Medal, color: "text-amber-500" },
             ].map((stat, i) => (
-              <div key={i} className="card p-6 flex items-center justify-between">
+              <div 
+                key={i} 
+                onClick={() => stat.href && router.push(stat.href)}
+                className={`card p-6 flex items-center justify-between ${stat.href ? 'cursor-pointer hover:border-primary/50 transition-all active:scale-95' : ''}`}
+              >
                 <div>
                   <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">{stat.label}</p>
-                  <p className={`text-2xl font-black italic ${stat.color}`}>{stat.val}</p>
+                  <p className={`text-2xl font-black italic tracking-tighter ${stat.color}`}>{stat.val}</p>
                 </div>
                 <stat.icon className={`w-8 h-8 opacity-20 ${stat.color}`} />
               </div>

@@ -170,69 +170,89 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
           </div>
 
           {/* Dynamic Markets List */}
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+          <div className="space-y-6">
             {match.predictions
               ?.filter((p: any) => p.category === marketTab)
               .length === 0 ? (
-                <div className="text-center py-20 bg-[#1A1A1A] rounded-2xl border border-dashed border-zinc-800">
+                <div className="text-center py-20 bg-[#1A1A1A] rounded-[2rem] border border-dashed border-zinc-800">
                    <Activity className="w-12 h-12 text-zinc-800 mx-auto mb-4" />
                    <h3 className="text-sm font-black text-white italic uppercase tracking-tighter">No markets available in {marketTab}</h3>
-                   <p className="text-[9px] text-zinc-600 font-bold uppercase mt-2 italic shadow-sm tracking-widest">Markets for this category are temporarily locked or not offered for this event.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4">
                   {match.predictions
                     ?.filter((p: any) => p.category === marketTab)
-                    .map((pred: any) => {
+                    .map((pred: any, idx: number) => {
                     const odds = (pred.odds as any) || {};
+                    const isEven = idx % 2 === 0;
+                    
                     return (
-                      <div key={pred.id} className="card bg-[#1A1A1A] border-[#2A2A2A] overflow-hidden group hover:border-[#333]">
-                        <div className="bg-[#222] px-3 py-2.5 border-b border-[#2A2A2A] flex flex-col justify-between items-start group-hover:bg-[#282828] transition-colors gap-1">
-                           <div className="flex items-center gap-2">
-                              <TrendingUp className="w-3 h-3 text-primary" />
-                              <h3 className="text-[9px] font-black italic tracking-tight text-white uppercase line-clamp-1">{pred.question}</h3>
-                           </div>
-                           <div className="flex items-center gap-2 w-full justify-between">
-                              <span className="text-[7px] font-bold text-zinc-600 uppercase">Markets</span>
-                              <div className="flex gap-2">
-                                <div className="text-[7px] font-black text-blue-400 uppercase">Back</div>
-                                <div className="text-[7px] font-black text-pink-400 uppercase">Lay</div>
+                      <div 
+                        key={pred.id} 
+                        className={`relative overflow-hidden group transition-all duration-500 rounded-3xl border ${isEven ? 'bg-[#1A1A1A] border-zinc-800' : 'bg-[#151515] border-primary/10'}`}
+                      >
+                        {/* Sparkling Background Effect */}
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
+                          <div className="absolute top-0 -left-[100%] w-full h-full bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-[-25deg] animate-[shimmer_2s_infinite]"></div>
+                        </div>
+
+                        <div className="px-5 py-4 border-b border-white/5 flex justify-between items-center relative z-10">
+                           <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isEven ? 'bg-primary/20 text-primary' : 'bg-blue-500/20 text-blue-400'}`}>
+                                <Zap size={16} />
                               </div>
+                              <h3 className="text-[10px] md:text-[12px] font-black italic tracking-tight text-white uppercase">{pred.question}</h3>
+                           </div>
+                           <div className="flex items-center gap-3">
+                              <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest hidden sm:block">Exchange Markets</span>
+                              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                            </div>
                         </div>
                         
-                        <div className="divide-y divide-[#2A2A2A]">
+                        <div className="divide-y divide-white/5 relative z-10">
                           {pred.options.map((opt: string) => (
-                            <div key={opt} className="flex flex-col p-2.5 hover:bg-white/5 transition-all gap-2">
-                               <div className="flex items-center justify-between w-full">
-                                  <span className="font-black text-[9px] uppercase tracking-tighter text-zinc-300 truncate max-w-[60px]">{opt}</span>
-                                  <div className="flex gap-1.5 shrink-0">
-                                     <button 
-                                       onClick={() => { 
-                                         setSelectedOption(opt); 
-                                         setSelectedType('BACK'); 
-                                         setSelectedPredictionId(pred.id); 
-                                         setSelectedOdds(odds[opt]?.back || 1.85);
-                                      }}
-                                      className={`odds-box-back w-10 h-10 flex flex-col items-center justify-center transition-all ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'BACK' ? 'ring-2 ring-white scale-105' : 'hover:scale-105'}`}
-                                    >
-                                       <div className="text-[11px] font-black">{odds[opt]?.back || '1.85'}</div>
-                                    </button>
-                                    <button 
-                                      onClick={() => { 
-                                        setSelectedOption(opt); 
-                                        setSelectedType('LAY'); 
-                                        setSelectedPredictionId(pred.id); 
-                                        setSelectedOdds(odds[opt]?.lay || 1.87);
-                                      }}
-                                      className={`odds-box-lay w-10 h-10 flex flex-col items-center justify-center transition-all ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'LAY' ? 'ring-2 ring-white scale-105' : 'hover:scale-105'}`}
-                                    >
-                                       <div className="text-[11px] font-black">{odds[opt]?.lay || '1.87'}</div>
-                                    </button>
-                                 </div>
+                            <div key={opt} className="flex items-center justify-between p-4 hover:bg-primary/5 transition-all group/opt">
+                               <div className="flex items-center gap-4 flex-1">
+                                  <div className="text-[11px] font-black uppercase text-zinc-400 group-hover/opt:text-white transition-colors">{opt}</div>
+                               </div>
+                               
+                               <div className="flex gap-2">
+                                  <button 
+                                    onClick={() => { 
+                                      setSelectedOption(opt); 
+                                      setSelectedType('BACK'); 
+                                      setSelectedPredictionId(pred.id); 
+                                      setSelectedOdds(odds[opt]?.back || 1.85);
+                                    }}
+                                    className={`relative overflow-hidden w-16 h-12 flex flex-col items-center justify-center rounded-xl border transition-all ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'BACK' ? 'bg-blue-500 border-white scale-105 shadow-lg shadow-blue-500/20' : 'bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20 hover:border-blue-500'}`}
+                                  >
+                                     <div className={`text-[14px] font-black ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'BACK' ? 'text-white' : 'text-blue-400'}`}>{odds[opt]?.back || '1.85'}</div>
+                                     <div className={`text-[7px] font-bold uppercase opacity-60 ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'BACK' ? 'text-white' : 'text-blue-200'}`}>Back</div>
+                                  </button>
+                                  <button 
+                                    onClick={() => { 
+                                      setSelectedOption(opt); 
+                                      setSelectedType('LAY'); 
+                                      setSelectedPredictionId(pred.id); 
+                                      setSelectedOdds(odds[opt]?.lay || 1.87);
+                                    }}
+                                    className={`relative overflow-hidden w-16 h-12 flex flex-col items-center justify-center rounded-xl border transition-all ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'LAY' ? 'bg-pink-500 border-white scale-105 shadow-lg shadow-pink-500/20' : 'bg-pink-500/10 border-pink-500/20 hover:bg-pink-500/20 hover:border-pink-500'}`}
+                                  >
+                                     <div className={`text-[14px] font-black ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'LAY' ? 'text-white' : 'text-pink-400'}`}>{odds[opt]?.lay || '1.87'}</div>
+                                     <div className={`text-[7px] font-bold uppercase opacity-60 ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'LAY' ? 'text-white' : 'text-pink-200'}`}>Lay</div>
+                                  </button>
                                </div>
                             </div>
                           ))}
+                        </div>
+
+                        {/* Status Bar */}
+                        <div className="px-5 py-2 bg-black/40 flex justify-between items-center bg-zinc-900/50">
+                           <span className="text-[7px] font-bold text-zinc-600 uppercase tracking-widest">Min: 100 | Max: 5.0L</span>
+                           <div className="flex gap-3">
+                              <span className="text-[7px] font-black text-blue-400/50 uppercase">Liab: 0</span>
+                              <span className="text-[7px] font-black text-green-400/50 uppercase">Pft: 0</span>
+                           </div>
                         </div>
                       </div>
                     );

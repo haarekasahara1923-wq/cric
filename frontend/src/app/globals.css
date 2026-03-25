@@ -60,6 +60,30 @@ body {
   background: var(--surface-light);
   border-radius: 10px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+/* Custom Animations */
+@keyframes shimmer {
+  0% { transform: translateX(-100%) skewX(-25deg); }
+  100% { transform: translateX(200%) skewX(-25deg); }
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-color: rgba(255, 107, 0, 0.1); }
+  50% { border-color: rgba(255, 107, 0, 0.5); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite ease-in-out;
+}
+
+.animate-float {
+  animation: float 3s infinite ease-in-out;
+}
+
+.sparkle-border {
+  animation: pulse-border 2s infinite;
 }
