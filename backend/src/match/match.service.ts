@@ -177,106 +177,34 @@ export class MatchService implements OnModuleInit {
     });
     if (!match) return;
 
-    const existingCount = await this.prisma.prediction.count({
-      where: { match_id: matchId }
-    });
-    // Increase limit to 100 to allow backfilling new types for existing matches
-    if (existingCount > 100) return;
-
-    const defaultPredictions = [
-      {
-        type: 'MATCH_WINNER_EX',
-        category: 'EXCHANGE',
-        question: `Match Winner (Back/Lay): ${match.team_a} vs ${match.team_b}`,
-        options: [match.team_a, match.team_b],
-      },
-      {
-        type: 'TOSS_WINNER_EX',
-        category: 'EXCHANGE',
-        question: `Toss Winner: ${match.team_a} or ${match.team_b}`,
-        options: [match.team_a, match.team_b],
-      },
-      {
-        type: 'TOTAL_RUNS_EX',
-        category: 'EXCHANGE',
-        question: 'Match Total Runs (High Liquidity)',
-        options: ['Under 310.5', 'Over 310.5'],
-      },
-      {
-        type: 'TOTAL_SIXES_EX',
-        category: 'EXCHANGE',
-        question: 'Total Match Sixes (Exchange)',
-        options: ['Under 14.5', 'Over 14.5'],
-      },
-      {
-        type: 'INNINGS_RUNS_EX',
-        category: 'EXCHANGE',
-        question: '1st Innings 20 Over Runs',
-        options: ['Under 165.5', 'Over 165.5'],
-      },
-      {
-        type: 'POWERPLAY_RUNS_EX',
-        category: 'EXCHANGE',
-        question: 'Powerplay (6 Overs) Runs',
-        options: ['Under 48.5', 'Over 48.5'],
-      },
-      {
-        type: 'TOSS_MATCH_COMBO',
-        category: 'BOOKMAKER',
-        question: 'Toss Winner & Match Winner (Combo)',
-        options: [`${match.team_a}/${match.team_a}`, `${match.team_a}/${match.team_b}`, `${match.team_b}/${match.team_a}`, `${match.team_b}/${match.team_b}`],
-      },
-      {
-        type: 'CENTURY_SCORED',
-        category: 'BOOKMAKER',
-        question: 'Century scored in match?',
-        options: ['Yes', 'No'],
-      },
-      {
-        type: 'TOP_BATSMAN',
-        category: 'BOOKMAKER',
-        question: 'Top Batsman of Match',
-        options: [match.team_a, match.team_b, 'Others'],
-      },
-      {
-        type: 'TOP_WICKET_TAKER',
-        category: 'BOOKMAKER',
-        question: 'Top Wicket Taker of Match',
-        options: [match.team_a, match.team_b, 'Others'],
-      },
-      {
-        type: 'HAT_TRICK',
-        category: 'BOOKMAKER',
-        question: 'Hat-trick in match?',
-        options: ['Yes', 'No'],
-      },
-      {
-        type: 'NEXT_WICKET_METHOD',
-        category: 'FANCY',
-        question: 'Next Wicket Method',
-        options: ['Caught', 'Bowled', 'LBW', 'Run Out', 'Others'],
-      },
-      {
-        type: 'SESSION_RUNS_10',
-        category: 'FANCY',
-        question: '1st Innings 10 Over Runs (Under/Over 78.5)',
-        options: ['Under 78.5', 'Over 78.5'],
-      },
-      {
-        type: 'BALL_BY_BALL',
-        category: 'FANCY',
-        question: 'Next Ball Outcome',
-        options: ['Dot', 'Single', 'Boundary', 'Wicket', 'Others'],
-      },
-      {
-        type: 'MOST_SIXES_TEAM',
-        category: 'BOOKMAKER',
-        question: 'Team to hit most sixes',
-        options: [match.team_a, match.team_b, 'Draw'],
-      }
+    const allPredictions = [
+      // ===== EXCHANGE (6 markets) =====
+      { type: 'EX_MATCH_WINNER', category: 'EXCHANGE', question: `Match Winner: ${match.team_a} vs ${match.team_b}`, options: [match.team_a, match.team_b] },
+      { type: 'EX_TOSS_WINNER', category: 'EXCHANGE', question: `Toss Winner: ${match.team_a} or ${match.team_b}`, options: [match.team_a, match.team_b] },
+      { type: 'EX_TOTAL_RUNS', category: 'EXCHANGE', question: 'Match Total Runs (Over/Under 310.5)', options: ['Under 310.5', 'Over 310.5'] },
+      { type: 'EX_TOTAL_SIXES', category: 'EXCHANGE', question: 'Total Match Sixes (Over/Under 14.5)', options: ['Under 14.5', 'Over 14.5'] },
+      { type: 'EX_INNINGS_RUNS', category: 'EXCHANGE', question: '1st Innings Total Runs (Over/Under 165.5)', options: ['Under 165.5', 'Over 165.5'] },
+      { type: 'EX_POWERPLAY', category: 'EXCHANGE', question: 'Powerplay Runs - 6 Overs (Over/Under 48.5)', options: ['Under 48.5', 'Over 48.5'] },
+      // ===== BOOKMAKER (5 markets) =====
+      { type: 'BK_TOSS_MATCH_COMBO', category: 'BOOKMAKER', question: 'Toss Winner & Match Winner (Combo)', options: [`${match.team_a}/${match.team_a}`, `${match.team_a}/${match.team_b}`, `${match.team_b}/${match.team_a}`, `${match.team_b}/${match.team_b}`] },
+      { type: 'BK_CENTURY', category: 'BOOKMAKER', question: 'Century scored in match?', options: ['Yes', 'No'] },
+      { type: 'BK_TOP_BATSMAN', category: 'BOOKMAKER', question: 'Top Batsman of Match', options: [match.team_a, match.team_b, 'Others'] },
+      { type: 'BK_TOP_BOWLER', category: 'BOOKMAKER', question: 'Top Wicket Taker of Match', options: [match.team_a, match.team_b, 'Others'] },
+      { type: 'BK_MOST_SIXES', category: 'BOOKMAKER', question: 'Team to hit most sixes', options: [match.team_a, match.team_b, 'Draw'] },
+      { type: 'BK_HAT_TRICK', category: 'BOOKMAKER', question: 'Hat-trick in match?', options: ['Yes', 'No'] },
+      // ===== FANCY (3 markets) =====
+      { type: 'FY_WICKET_METHOD', category: 'FANCY', question: 'Next Wicket Method', options: ['Caught', 'Bowled', 'LBW', 'Run Out', 'Others'] },
+      { type: 'FY_SESSION_10', category: 'FANCY', question: '1st Innings 10 Over Runs (Over/Under 78.5)', options: ['Under 78.5', 'Over 78.5'] },
+      { type: 'FY_BALL_BY_BALL', category: 'FANCY', question: 'Next Ball Outcome', options: ['Dot', 'Single', 'Boundary', 'Wicket', 'Others'] },
     ];
 
-    for (const pred of defaultPredictions) {
+    for (const pred of allPredictions) {
+      // Simple check: does this exact type already exist for this match?
+      const exists = await this.prisma.prediction.findFirst({
+        where: { match_id: matchId, type: pred.type }
+      });
+      if (exists) continue; // Skip if already exists, no duplicate possible
+
       const initialOdds: any = {};
       pred.options.forEach(opt => {
         const val = 1.80 + Math.random() * 0.4;
@@ -286,16 +214,8 @@ export class MatchService implements OnModuleInit {
         };
       });
 
-      await this.prisma.prediction.upsert({
-        where: {
-          match_id_type: { match_id: matchId, type: pred.type }
-        },
-        update: {
-          // Update question if it changed, but keep odds if they already exist
-          question: pred.question,
-          category: pred.category,
-        },
-        create: {
+      await this.prisma.prediction.create({
+        data: {
           match_id: matchId,
           type: pred.type,
           category: pred.category,
@@ -307,7 +227,7 @@ export class MatchService implements OnModuleInit {
       });
     }
     
-    this.logger.log(`✅ Refreshed/Upserted predictions for match ${match.team_a} vs ${match.team_b}`);
+    this.logger.log(`✅ Generated ${allPredictions.length} prediction types for ${match.team_a} vs ${match.team_b}`);
   }
 
   async getMatches(status?: string) {

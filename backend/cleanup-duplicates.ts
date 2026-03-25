@@ -3,32 +3,15 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🧹 Cleaning up duplicate predictions...');
-  
-  const allMatches = await prisma.match.findMany({
-    select: { id: true }
-  });
+  console.log('🧹 Step 1: Deleting all user predictions...');
+  const userPredResult = await prisma.userPrediction.deleteMany({});
+  console.log(`🗑️ Deleted ${userPredResult.count} user predictions.`);
 
-  for (const match of allMatches) {
-    const predictions = await prisma.prediction.findMany({
-      where: { match_id: match.id },
-      orderBy: { created_at: 'asc' }
-    });
-
-    const seen = new Set();
-    for (const pred of predictions) {
-      if (seen.has(pred.type)) {
-        console.log(`🗑️ Deleting duplicate: Match ${match.id}, Type ${pred.type}, ID ${pred.id}`);
-        await prisma.prediction.delete({
-          where: { id: pred.id }
-        });
-      } else {
-        seen.add(pred.type);
-      }
-    }
-  }
+  console.log('🧹 Step 2: Deleting all predictions...');
+  const predResult = await prisma.prediction.deleteMany({});
+  console.log(`🗑️ Deleted ${predResult.count} predictions.`);
   
-  console.log('✅ Cleanup finished.');
+  console.log('✅ Done! Backend will regenerate fresh predictions on next sync.');
 }
 
 main()
