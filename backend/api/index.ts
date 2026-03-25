@@ -3,7 +3,7 @@ import { AppModule } from '../src/app.module';
 
 export default async (req: any, res: any) => {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api/v1', { exclude: ['/'] });
   app.enableCors({
     origin: [
       'https://cric-xi.vercel.app',
