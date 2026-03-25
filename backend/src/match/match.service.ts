@@ -185,45 +185,39 @@ export class MatchService implements OnModuleInit {
 
     const defaultPredictions = [
       {
-        type: 'MATCH_WINNER',
+        type: 'MATCH_WINNER_EX',
         category: 'EXCHANGE',
-        question: `Match Winner: ${match.team_a} vs ${match.team_b}`,
+        question: `Match Winner (Back/Lay): ${match.team_a} vs ${match.team_b}`,
         options: [match.team_a, match.team_b],
       },
       {
-        type: 'TOSS_WINNER',
+        type: 'TOSS_WINNER_EX',
         category: 'EXCHANGE',
         question: `Toss Winner: ${match.team_a} or ${match.team_b}`,
         options: [match.team_a, match.team_b],
       },
       {
-        type: 'TOTAL_RUNS_EXCHANGE',
+        type: 'TOTAL_RUNS_EX',
         category: 'EXCHANGE',
-        question: 'Match Total Runs (Over/Under 310.5)',
+        question: 'Match Total Runs (High Liquidity)',
         options: ['Under 310.5', 'Over 310.5'],
       },
       {
-        type: 'TOTAL_SIXES_EXCHANGE',
+        type: 'TOTAL_SIXES_EX',
         category: 'EXCHANGE',
-        question: 'Match Total Sixes (Over/Under 14.5)',
+        question: 'Total Match Sixes (Exchange)',
         options: ['Under 14.5', 'Over 14.5'],
       },
       {
-        type: 'INNINGS_RUNS_EXCHANGE',
+        type: 'INNINGS_RUNS_EX',
         category: 'EXCHANGE',
-        question: '1st Innings Runs (Over/Under 175.5)',
-        options: ['Under 175.5', 'Over 175.5'],
+        question: '1st Innings 20 Over Runs',
+        options: ['Under 165.5', 'Over 165.5'],
       },
       {
-        type: 'TOTAL_BOUNDARIES_EXCHANGE',
+        type: 'POWERPLAY_RUNS_EX',
         category: 'EXCHANGE',
-        question: 'Match Total Boundaries (Over/Under 35.5)',
-        options: ['Under 35.5', 'Over 35.5'],
-      },
-      {
-        type: 'SESSION_RUNS_EXCHANGE',
-        category: 'EXCHANGE',
-        question: 'Any Team Score In Powerplay (Over/Under 48.5)',
+        question: 'Powerplay (6 Overs) Runs',
         options: ['Under 48.5', 'Over 48.5'],
       },
       {
@@ -231,12 +225,6 @@ export class MatchService implements OnModuleInit {
         category: 'BOOKMAKER',
         question: 'Toss Winner & Match Winner (Combo)',
         options: [`${match.team_a}/${match.team_a}`, `${match.team_a}/${match.team_b}`, `${match.team_b}/${match.team_a}`, `${match.team_b}/${match.team_b}`],
-      },
-      {
-        type: 'POWERPLAY_RUNS_6',
-        category: 'FANCY',
-        question: 'Powerplay runs (1st 6 overs) (Under/Over 48.5)',
-        options: ['Under 48.5', 'Over 48.5'],
       },
       {
         type: 'CENTURY_SCORED',
