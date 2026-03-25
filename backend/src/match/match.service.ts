@@ -178,11 +178,12 @@ export class MatchService implements OnModuleInit {
     if (!match) return;
 
     const allPredictions = [
-      // ===== EXCHANGE (8 markets) =====
+      // ===== EXCHANGE (9 markets) =====
       { type: 'EX_MATCH_WINNER', category: 'EXCHANGE', question: `Match Winner: ${match.team_a} vs ${match.team_b}`, options: [match.team_a, match.team_b] },
       { type: 'EX_TOSS_WINNER', category: 'EXCHANGE', question: `Toss Winner: ${match.team_a} or ${match.team_b}`, options: [match.team_a, match.team_b] },
       { type: 'EX_TOTAL_RUNS', category: 'EXCHANGE', question: 'Total match runs (Under/Over 320.5)', options: ['Under 320.5', 'Over 320.5'] },
       { type: 'EX_TOTAL_SIXES', category: 'EXCHANGE', question: 'Total Match Sixes (Under/Over 14.5)', options: ['Under 14.5', 'Over 14.5'] },
+      { type: 'EX_TOTAL_FOURS', category: 'EXCHANGE', question: 'Total Match Fours (Under/Over 28.5)', options: ['Under 28.5', 'Over 28.5'] },
       { type: 'EX_INNINGS_RUNS', category: 'EXCHANGE', question: '1st Innings Runs (Under/Over 165.5)', options: ['Under 165.5', 'Over 165.5'] },
       { type: 'EX_POWERPLAY', category: 'EXCHANGE', question: 'Powerplay (6 Overs) Runs (Under/Over 48.5)', options: ['Under 48.5', 'Over 48.5'] },
       { type: 'EX_SPECIFIC_OVER', category: 'EXCHANGE', question: '10th Over Total Runs (Over/Under 8.5)', options: ['Under 8.5', 'Over 8.5'] },
