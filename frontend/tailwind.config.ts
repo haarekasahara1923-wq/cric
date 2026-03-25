@@ -9,8 +9,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "#FF6B00",
-        "primary-hover": "#E66000",
+        primary: "#007AFF", // Blue
+        "primary-hover": "#005bb5",
+        accent: "#FFB6C1", // Baby Pink
+        "accent-hover": "#ff9eb0",
         surface: "#1A1A1A", // Satyam77 Surface
         background: "#0D0D0D", // Deep Black
         border: "#2A2A2A",
