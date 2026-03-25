@@ -12,6 +12,7 @@ import { GamificationModule } from './gamification/gamification.module';
 import { NotificationModule } from './notification/notification.module';
 import { AdminModule } from './admin/admin.module';
 import { WebsocketModule } from './websocket/websocket.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { WebsocketModule } from './websocket/websocket.module';
     AdminModule,
     WebsocketModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}

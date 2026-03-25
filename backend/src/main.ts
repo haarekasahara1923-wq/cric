@@ -37,8 +37,9 @@ async function bootstrap() {
   );
 
   // Set global prefix if needed
-  app.setGlobalPrefix('api/v1');
-
+  app.setGlobalPrefix('api/v1', {
+    exclude: ['/'],
+  });
   await app.listen(port);
   console.log(`🚀 Backend is running on: http://localhost:${port}/api/v1`);
 }
