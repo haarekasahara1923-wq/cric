@@ -277,12 +277,6 @@ export class MatchService implements OnModuleInit {
     ];
 
     for (const pred of defaultPredictions) {
-      // Check if this specific prediction type already exists for this match
-      const exists = await this.prisma.prediction.findFirst({
-        where: { match_id: matchId, type: pred.type }
-      });
-      if (exists) continue;
-
       const initialOdds: any = {};
       pred.options.forEach(opt => {
         const val = 1.80 + Math.random() * 0.4;
@@ -292,8 +286,16 @@ export class MatchService implements OnModuleInit {
         };
       });
 
-      await this.prisma.prediction.create({
-        data: {
+      await this.prisma.prediction.upsert({
+        where: {
+          match_id_type: { match_id: matchId, type: pred.type }
+        },
+        update: {
+          // Update question if it changed, but keep odds if they already exist
+          question: pred.question,
+          category: pred.category,
+        },
+        create: {
           match_id: matchId,
           type: pred.type,
           category: pred.category,
@@ -305,7 +307,7 @@ export class MatchService implements OnModuleInit {
       });
     }
     
-    this.logger.log(`✅ Refreshed/Generated predictions for match ${match.team_a} vs ${match.team_b}`);
+    this.logger.log(`✅ Refreshed/Upserted predictions for match ${match.team_a} vs ${match.team_b}`);
   }
 
   async getMatches(status?: string) {

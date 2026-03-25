@@ -97,6 +97,8 @@ model Prediction {
   updated_at      DateTime    @updatedAt
 
   user_predictions UserPrediction[]
+
+  @@unique([match_id, type])
 }
 
 model UserPrediction {
