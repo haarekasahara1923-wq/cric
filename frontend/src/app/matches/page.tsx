@@ -25,6 +25,7 @@ export default function MatchesPage() {
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
     if (window.innerWidth >= 768) {
@@ -35,17 +36,21 @@ export default function MatchesPage() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const fetchMatches = async () => {
+    const fetchInitialData = async () => {
       try {
-        const response = await api.get('/matches');
-        setMatches(response.data);
+        const [matchesRes, userRes] = await Promise.all([
+          api.get('/matches'),
+          api.get('/auth/me')
+        ]);
+        setMatches(matchesRes.data);
+        setUserData(userRes.data);
       } catch (error) {
-        console.error('Failed to fetch matches:', error);
+        console.error('Failed to fetch data:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchMatches();
+    fetchInitialData();
   }, []);
 
   const handleLogout = () => {
@@ -78,13 +83,14 @@ export default function MatchesPage() {
         <div className="flex items-center gap-4">
           <div className="hidden md:flex flex-col items-end px-4 border-r border-[#2A2A2A]">
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Balance</span>
-            <span className="text-primary font-black text-sm">125,450 <span className="text-[10px]">PTS</span></span>
+            <span className="text-primary font-black text-sm">{userData?.points_balance?.toLocaleString() || '0'} <span className="text-[10px]">PTS</span></span>
           </div>
-          <button className="p-2 text-text-muted hover:text-white transition-colors">
+          <button className="p-2 text-text-muted hover:text-white transition-colors relative">
             <Bell className="w-5 h-5" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full ring-2 ring-[#1A1A1A]"></span>
           </button>
-          <div className="w-10 h-10 rounded-full bg-surface-light border border-border flex items-center justify-center text-primary font-black cursor-pointer">
-            AD
+          <div className="w-10 h-10 rounded-full bg-surface-light border border-border flex items-center justify-center text-primary font-black cursor-pointer hover:border-primary transition-all uppercase">
+            {userData?.name?.[0] || userData?.email?.[0] || 'U'}
           </div>
         </div>
       </header>
@@ -102,6 +108,7 @@ export default function MatchesPage() {
                 >
                   <link.icon className="w-4 h-4" />
                   <span>{link.name}</span>
+                  {link.name === "Exchange" && <span className="ml-auto text-[10px] bg-primary text-black font-black px-1.5 rounded animate-pulse">LIVE</span>}
                 </Link>
               ))}
             </nav>
@@ -149,6 +156,12 @@ export default function MatchesPage() {
               <div className="space-y-4">
                 {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-[#1A1A1A] rounded-xl animate-pulse" />)}
               </div>
+            ) : matches.length === 0 ? (
+               <div className="text-center py-20 bg-[#1A1A1A] rounded-2xl border border-dashed border-zinc-800">
+                  <Activity className="w-12 h-12 text-zinc-800 mx-auto mb-4" />
+                  <h3 className="text-lg font-black text-white italic uppercase">No Active Matches</h3>
+                  <p className="text-[10px] text-zinc-600 font-bold uppercase mt-2">Check back soon for upcoming events and live markets.</p>
+               </div>
             ) : (
               <div className="space-y-3">
                  {matches.map((match) => (
