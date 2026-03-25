@@ -180,8 +180,8 @@ export class MatchService implements OnModuleInit {
     const existingCount = await this.prisma.prediction.count({
       where: { match_id: matchId }
     });
-    // Only generate if none exist or very few (to allow adding more)
-    if (existingCount > 10) return;
+    // Increase limit to 100 to allow backfilling new types for existing matches
+    if (existingCount > 100) return;
 
     const defaultPredictions = [
       {
@@ -213,6 +213,18 @@ export class MatchService implements OnModuleInit {
         category: 'EXCHANGE',
         question: '1st Innings Runs (Over/Under 175.5)',
         options: ['Under 175.5', 'Over 175.5'],
+      },
+      {
+        type: 'TOTAL_BOUNDARIES_EXCHANGE',
+        category: 'EXCHANGE',
+        question: 'Match Total Boundaries (Over/Under 35.5)',
+        options: ['Under 35.5', 'Over 35.5'],
+      },
+      {
+        type: 'SESSION_RUNS_EXCHANGE',
+        category: 'EXCHANGE',
+        question: 'Any Team Score In Powerplay (Over/Under 48.5)',
+        options: ['Under 48.5', 'Over 48.5'],
       },
       {
         type: 'TOSS_MATCH_COMBO',
