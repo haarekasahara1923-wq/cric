@@ -11,6 +11,7 @@ export class MatchService implements OnModuleInit {
   private readonly apiHost: string;
   private readonly apiKey: string;
   private readonly apiUrl: string;
+  private readonly cricketDataApiKey: string;
 
   constructor(
     private prisma: PrismaService,
@@ -18,6 +19,7 @@ export class MatchService implements OnModuleInit {
   ) {
     this.apiHost = this.configService.get('RAPIDAPI_HOST');
     this.apiKey = this.configService.get('RAPIDAPI_KEY');
+    this.cricketDataApiKey = this.configService.get('CRICKET_DATA_API');
     this.apiUrl = `https://${this.apiHost}/matches/v1/upcoming`;
   }
 
@@ -27,8 +29,61 @@ export class MatchService implements OnModuleInit {
 
   @Cron(CronExpression.EVERY_HOUR)
   async syncUpcomingMatches() {
-    this.logger.log('🔄 Syncing upcoming IPL matches from RapidAPI...');
+    this.logger.log('🔄 Syncing matches from CricketData.org...');
     
+    try {
+      // 1. Fetch from CricketData.org (New main API)
+      const cricketDataResponse = await axios.get(`https://api.cricketdata.org/v1/currentMatches?apikey=${this.cricketDataApiKey}`);
+      const matches = cricketDataResponse.data?.data || [];
+      
+      this.logger.log(`🔍 Found ${matches.length} matches in CricketData.org`);
+
+      for (const m of matches) {
+        const apiMatchId = m.id;
+        const teamA = m.teams[0] || 'Team A';
+        const teamB = m.teams[1] || 'Team B';
+        const startTime = new Date(m.dateTimeGMT);
+        const venue = m.venue || 'TBA';
+        
+        let status: MatchStatus = MatchStatus.UPCOMING;
+        if (m.matchStarted) status = MatchStatus.LIVE;
+        if (m.matchEnded) status = MatchStatus.COMPLETED;
+
+        // Create or update match
+        const dbMatch = await this.prisma.match.upsert({
+          where: { api_match_id: apiMatchId },
+          update: {
+            status,
+            venue,
+            start_time: startTime,
+          },
+          create: {
+            api_match_id: apiMatchId,
+            team_a: teamA,
+            team_b: teamB,
+            team_a_img: m.teamInfo?.[0]?.img || `https://flagsapi.com/IN/flat/64.png`, 
+            team_b_img: m.teamInfo?.[1]?.img || `https://flagsapi.com/IN/flat/64.png`,
+            start_time: startTime,
+            status,
+            venue,
+          }
+        });
+
+        // Generate predictions for new matches
+        await this.generateMatchPredictions(dbMatch.id);
+      }
+
+      this.logger.log(`✅ Successfully synced matches from CricketData.org.`);
+    } catch (error) {
+      this.logger.error('❌ Failed to sync matches from CricketData.org:', error.message);
+      
+      // Fallback to RapidAPI if CricketData fails
+      this.logger.log('🔄 Attempting fallback to RapidAPI...');
+      await this.syncFromRapidAPI();
+    }
+  }
+
+  async syncFromRapidAPI() {
     try {
       const response = await axios.get(this.apiUrl, {
         headers: {
@@ -37,20 +92,11 @@ export class MatchService implements OnModuleInit {
         }
       });
       
-      this.logger.log(`🔍 Raw API Response Structure: ${Object.keys(response.data || {}).join(', ')}`);
-      
       const typeMatches = response.data?.typeMatches || [];
-      if (typeMatches.length === 0) {
-        this.logger.warn('⚠️ No matches found in the API response under "typeMatches".');
-      }
-      let iplMatchesFound = 0;
-
       for (const group of typeMatches) {
           const seriesMatches = group.seriesMatches || [];
-          
           for (const series of seriesMatches) {
             const matches = series.seriesAdWrapper?.matches || [];
-            
             for (const m of matches) {
               const matchInfo = m.matchInfo;
               if (!matchInfo) continue;
@@ -61,19 +107,13 @@ export class MatchService implements OnModuleInit {
               const startTime = new Date(parseInt(matchInfo.startDate));
               const venue = `${matchInfo.venueInfo?.ground}, ${matchInfo.venueInfo?.city}`;
               
-              // Map API status to our MatchStatus
               let status: MatchStatus = MatchStatus.UPCOMING;
               if (matchInfo.state === 'In Progress' || matchInfo.state === 'Live') status = MatchStatus.LIVE;
               if (matchInfo.state === 'Complete') status = MatchStatus.COMPLETED;
 
-              // Upsert into our DB
               const dbMatch = await this.prisma.match.upsert({
                 where: { api_match_id: apiMatchId },
-                update: {
-                  status,
-                  venue,
-                  start_time: startTime,
-                },
+                update: { status, venue, start_time: startTime },
                 create: {
                   api_match_id: apiMatchId,
                   team_a: teamA,
@@ -85,22 +125,18 @@ export class MatchService implements OnModuleInit {
                   venue,
                 }
               });
-
-              // Generate predictions for new matches
               await this.generateMatchPredictions(dbMatch.id);
+            }
           }
-        }
       }
-
-      this.logger.log(`✅ Successfully synced matches.`);
-    } catch (error) {
-      this.logger.error('❌ Failed to sync matches from RapidAPI:', error.message);
+      this.logger.log('✅ Fallback RapidAPI sync completed');
+    } catch (err) {
+      this.logger.error('❌ Fallback RapidAPI also failed:', err.message);
     }
   }
 
   @Cron('*/30 * * * * *')
   async updateLiveOdds() {
-    console.log('Update Live Odds Job Triggered');
     const predictions = await this.prisma.prediction.findMany({
       where: { match: { status: { in: ['UPCOMING', 'LIVE'] } } }
     });
@@ -109,6 +145,8 @@ export class MatchService implements OnModuleInit {
       const currentOdds = (pred.odds as any) || {};
       const newOdds: any = {};
       
+      if (!pred.options || !Array.isArray(pred.options)) continue;
+
       (pred.options as string[]).forEach(opt => {
         const base = currentOdds[opt]?.back || 1.80 + Math.random() * 0.4;
         const change = (Math.random() - 0.5) * 0.05;
@@ -132,16 +170,17 @@ export class MatchService implements OnModuleInit {
     });
     if (!match) return;
 
-    const existing = await this.prisma.prediction.findFirst({
+    const existingCount = await this.prisma.prediction.count({
       where: { match_id: matchId }
     });
-    if (existing) return;
+    // Only generate if none exist or very few (to allow adding more)
+    if (existingCount > 10) return;
 
     const defaultPredictions = [
       {
         type: 'MATCH_WINNER',
         category: 'EXCHANGE',
-        question: `Match Winner: ${match.team_a} vs ${match.team_b}`,
+        question: `Who will win: ${match.team_a} vs ${match.team_b}?`,
         options: [match.team_a, match.team_b],
       },
       {
@@ -153,20 +192,32 @@ export class MatchService implements OnModuleInit {
       {
         type: 'TOTAL_SIXES',
         category: 'FANCY',
-        question: 'Total Match Sixes (Under/Over 14.5)',
-        options: ['Under 14.5', 'Over 14.5'],
+        question: 'Total Match Sixes (Under/Over 12.5)',
+        options: ['Under 12.5', 'Over 12.5'],
       },
       {
         type: 'TOTAL_FOURS',
         category: 'FANCY',
-        question: 'Total Match Fours (Under/Over 28.5)',
-        options: ['Under 28.5', 'Over 28.5'],
+        question: 'Total Match Fours (Under/Over 25.5)',
+        options: ['Under 25.5', 'Over 25.5'],
       },
       {
         type: 'SESSION_RUNS_6',
         category: 'FANCY',
-        question: '1st Innings 6 Over Session Runs',
-        options: ['Under 49.5', 'Over 49.5'],
+        question: '1st Innings 6 Over Runs (45.5)',
+        options: ['Under 45.5', 'Over 45.5'],
+      },
+      {
+        type: 'SESSION_RUNS_10',
+        category: 'FANCY',
+        question: '1st Innings 10 Over Runs (75.5)',
+        options: ['Under 75.5', 'Over 75.5'],
+      },
+      {
+        type: 'SESSION_RUNS_15',
+        category: 'FANCY',
+        question: '1st Innings 15 Over Runs (115.5)',
+        options: ['Under 115.5', 'Over 115.5'],
       },
       {
         type: 'FIRST_WICKET_FALL',
@@ -175,14 +226,38 @@ export class MatchService implements OnModuleInit {
         options: ['Under 3.5', 'Over 3.5'],
       },
       {
-        type: 'TOP_BATSMAN',
+        type: 'MOST_RUNS_BATSMAN',
         category: 'BOOKMAKER',
-        question: 'Who will be the top batsman?',
-        options: ['Player 1', 'Player 2', 'Player 3'], // In a real app, populate from squad
+        question: 'Highest Run Scorer in Match',
+        options: [match.team_a + ' Oppener', match.team_b + ' Oppener', 'Others'],
+      },
+      {
+        type: 'HIGHEST_OPENING_PARTNERSHIP',
+        category: 'BOOKMAKER',
+        question: 'Higher Opening Partnership',
+        options: [match.team_a, match.team_b],
+      },
+      {
+        type: 'MOST_SIXES_TEAM',
+        category: 'BOOKMAKER',
+        question: 'Team to hit most sixes',
+        options: [match.team_a, match.team_b, 'Draw'],
+      },
+      {
+        type: 'REMAINING_WICKET',
+        category: 'FANCY',
+        question: 'Next Wicket within 5 overs?',
+        options: ['Yes', 'No'],
       }
     ];
 
     for (const pred of defaultPredictions) {
+      // Check if this specific prediction type already exists for this match
+      const exists = await this.prisma.prediction.findFirst({
+        where: { match_id: matchId, type: pred.type }
+      });
+      if (exists) continue;
+
       const initialOdds: any = {};
       pred.options.forEach(opt => {
         const val = 1.80 + Math.random() * 0.4;
@@ -205,7 +280,7 @@ export class MatchService implements OnModuleInit {
       });
     }
     
-    this.logger.log(`✅ Generated 4 default predictions for match ${match.team_a} vs ${match.team_b}`);
+    this.logger.log(`✅ Refreshed/Generated predictions for match ${match.team_a} vs ${match.team_b}`);
   }
 
   async getMatches(status?: string) {

@@ -162,32 +162,32 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
           </div>
 
           {/* Dynamic Markets List */}
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-1 gap-4">
             {match.predictions
               ?.filter((p: any) => p.category === marketTab)
               .map((pred: any) => {
               const odds = (pred.odds as any) || {};
               return (
                 <div key={pred.id} className="card bg-[#1A1A1A] border-[#2A2A2A] overflow-hidden group hover:border-[#333]">
-                  <div className="bg-[#222] px-4 py-3 border-b border-[#2A2A2A] flex justify-between items-center group-hover:bg-[#282828] transition-colors">
+                  <div className="bg-[#222] px-4 py-3 border-b border-[#2A2A2A] flex flex-col md:flex-row justify-between items-start md:items-center group-hover:bg-[#282828] transition-colors gap-2">
                      <div className="flex items-center gap-3">
                         <TrendingUp className="w-4 h-4 text-primary" />
                         <h3 className="text-[11px] font-black italic tracking-tight text-white uppercase">{pred.question}</h3>
                      </div>
-                     <div className="flex items-center gap-2">
-                        <div className="w-16 text-center text-[10px] font-black text-blue-400 uppercase tracking-tighter">Back</div>
-                        <div className="w-16 text-center text-[10px] font-black text-pink-400 uppercase tracking-tighter">Lay</div>
+                     <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                        <div className="w-16 text-center text-[7px] font-black text-blue-400 uppercase tracking-tighter leading-tight">Back<br/>(Win/Buy)</div>
+                        <div className="w-16 text-center text-[7px] font-black text-pink-400 uppercase tracking-tighter leading-tight">Lay<br/>(Lost/Sell)</div>
                      </div>
                   </div>
                   
                   <div className="divide-y divide-[#2A2A2A]">
                     {pred.options.map((opt: string) => (
-                      <div key={opt} className="flex items-center justify-between p-3.5 hover:bg-white/5 transition-all">
+                      <div key={opt} className="flex flex-col md:flex-row items-start md:items-center justify-between p-3.5 hover:bg-white/5 transition-all gap-3">
                          <div className="flex items-center gap-3">
                             <div className="w-1.5 h-1.5 rounded-full bg-zinc-800 border border-zinc-700"></div>
-                            <span className="font-black text-[11px] uppercase tracking-tighter text-zinc-300">{opt}</span>
+                            <span className="font-black text-[10px] md:text-[11px] uppercase tracking-tighter text-zinc-300 truncate max-w-[100px] md:max-w-none">{opt}</span>
                          </div>
-                         <div className="flex gap-2">
+                         <div className="flex gap-2 w-full md:w-auto justify-end">
                             <button 
                               onClick={() => { 
                                 setSelectedOption(opt); 
@@ -195,7 +195,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
                                 setSelectedPredictionId(pred.id); 
                                 setSelectedOdds(odds[opt]?.back || 1.85);
                               }}
-                              className={`odds-box-back w-16 h-12 flex flex-col items-center justify-center transition-all ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'BACK' ? 'ring-2 ring-white scale-105' : 'hover:scale-105'}`}
+                              className={`odds-box-back w-full md:w-16 h-12 flex flex-col items-center justify-center transition-all ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'BACK' ? 'ring-2 ring-white scale-105' : 'hover:scale-105'}`}
                             >
                                <div className="text-[13px] font-black">{odds[opt]?.back || '1.85'}</div>
                                <div className="text-[7px] opacity-70 font-bold mt-0.5">{(Math.random() * 50).toFixed(1)}k</div>
@@ -207,7 +207,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
                                 setSelectedPredictionId(pred.id); 
                                 setSelectedOdds(odds[opt]?.lay || 1.87);
                               }}
-                              className={`odds-box-lay w-16 h-12 flex flex-col items-center justify-center transition-all ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'LAY' ? 'ring-2 ring-white scale-105' : 'hover:scale-105'}`}
+                              className={`odds-box-lay w-full md:w-16 h-12 flex flex-col items-center justify-center transition-all ${selectedOption === opt && selectedPredictionId === pred.id && selectedType === 'LAY' ? 'ring-2 ring-white scale-105' : 'hover:scale-105'}`}
                             >
                                <div className="text-[13px] font-black">{odds[opt]?.lay || '1.87'}</div>
                                <div className="text-[7px] opacity-70 font-bold mt-0.5">{(Math.random() * 30).toFixed(1)}k</div>
