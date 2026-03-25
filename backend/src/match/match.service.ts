@@ -193,20 +193,32 @@ export class MatchService implements OnModuleInit {
       {
         type: 'TOSS_WINNER',
         category: 'EXCHANGE',
-        question: 'Who will win the Toss?',
+        question: `Toss Winner: ${match.team_a} or ${match.team_b}`,
         options: [match.team_a, match.team_b],
+      },
+      {
+        type: 'TOTAL_RUNS_EXCHANGE',
+        category: 'EXCHANGE',
+        question: 'Match Total Runs (Over/Under 310.5)',
+        options: ['Under 310.5', 'Over 310.5'],
+      },
+      {
+        type: 'TOTAL_SIXES_EXCHANGE',
+        category: 'EXCHANGE',
+        question: 'Match Total Sixes (Over/Under 14.5)',
+        options: ['Under 14.5', 'Over 14.5'],
+      },
+      {
+        type: 'INNINGS_RUNS_EXCHANGE',
+        category: 'EXCHANGE',
+        question: '1st Innings Runs (Over/Under 175.5)',
+        options: ['Under 175.5', 'Over 175.5'],
       },
       {
         type: 'TOSS_MATCH_COMBO',
         category: 'BOOKMAKER',
         question: 'Toss Winner & Match Winner (Combo)',
         options: [`${match.team_a}/${match.team_a}`, `${match.team_a}/${match.team_b}`, `${match.team_b}/${match.team_a}`, `${match.team_b}/${match.team_b}`],
-      },
-      {
-        type: 'TOTAL_RUNS_OVER_UNDER',
-        category: 'FANCY',
-        question: 'Total match runs (Under/Over 325.5)',
-        options: ['Under 325.5', 'Over 325.5'],
       },
       {
         type: 'POWERPLAY_RUNS_6',
