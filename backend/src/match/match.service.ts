@@ -206,6 +206,8 @@ export class MatchService implements OnModuleInit {
       { type: 'FY_POWERPLAY_WICKETS', category: 'FANCY', question: 'Total Wickets in Powerplay (Over/Under 1.5)', options: ['Under 1.5', 'Over 1.5'] },
       { type: 'FY_WICKET_IN_OVER', category: 'FANCY', question: 'Will a Wicket fall in this over?', options: ['Yes', 'No'] },
       { type: 'FY_HIGHEST_RUN_OVER', category: 'FANCY', question: 'Highest Scoring Over (Over/Under 18.5)', options: ['Under 18.5', 'Over 18.5'] },
+      { type: 'FY_RUN_RATE_TREND', category: 'FANCY', question: 'Will RR stay above RRR?', options: ['Yes', 'No'] },
+      { type: 'BK_TOP_RUNS_INNINGS', category: 'BOOKMAKER', question: 'Top Run Scorer of Innings', options: [match.team_a, match.team_b, 'Others'] },
     ];
 
     for (const pred of allPredictions) {
