@@ -178,24 +178,34 @@ export class MatchService implements OnModuleInit {
     if (!match) return;
 
     const allPredictions = [
-      // ===== EXCHANGE (6 markets) =====
+      // ===== EXCHANGE (8 markets) =====
       { type: 'EX_MATCH_WINNER', category: 'EXCHANGE', question: `Match Winner: ${match.team_a} vs ${match.team_b}`, options: [match.team_a, match.team_b] },
       { type: 'EX_TOSS_WINNER', category: 'EXCHANGE', question: `Toss Winner: ${match.team_a} or ${match.team_b}`, options: [match.team_a, match.team_b] },
-      { type: 'EX_TOTAL_RUNS', category: 'EXCHANGE', question: 'Match Total Runs (Over/Under 310.5)', options: ['Under 310.5', 'Over 310.5'] },
-      { type: 'EX_TOTAL_SIXES', category: 'EXCHANGE', question: 'Total Match Sixes (Over/Under 14.5)', options: ['Under 14.5', 'Over 14.5'] },
-      { type: 'EX_INNINGS_RUNS', category: 'EXCHANGE', question: '1st Innings Total Runs (Over/Under 165.5)', options: ['Under 165.5', 'Over 165.5'] },
-      { type: 'EX_POWERPLAY', category: 'EXCHANGE', question: 'Powerplay Runs - 6 Overs (Over/Under 48.5)', options: ['Under 48.5', 'Over 48.5'] },
-      // ===== BOOKMAKER (5 markets) =====
+      { type: 'EX_TOTAL_RUNS', category: 'EXCHANGE', question: 'Total match runs (Under/Over 320.5)', options: ['Under 320.5', 'Over 320.5'] },
+      { type: 'EX_TOTAL_SIXES', category: 'EXCHANGE', question: 'Total Match Sixes (Under/Over 14.5)', options: ['Under 14.5', 'Over 14.5'] },
+      { type: 'EX_INNINGS_RUNS', category: 'EXCHANGE', question: '1st Innings Runs (Under/Over 165.5)', options: ['Under 165.5', 'Over 165.5'] },
+      { type: 'EX_POWERPLAY', category: 'EXCHANGE', question: 'Powerplay (6 Overs) Runs (Under/Over 48.5)', options: ['Under 48.5', 'Over 48.5'] },
+      { type: 'EX_SPECIFIC_OVER', category: 'EXCHANGE', question: '10th Over Total Runs (Over/Under 8.5)', options: ['Under 8.5', 'Over 8.5'] },
+      { type: 'EX_TOTAL_WICKETS', category: 'EXCHANGE', question: 'Total Match Wickets (Over/Under 12.5)', options: ['Under 12.5', 'Over 12.5'] },
+
+      // ===== BOOKMAKER (8 markets) =====
       { type: 'BK_TOSS_MATCH_COMBO', category: 'BOOKMAKER', question: 'Toss Winner & Match Winner (Combo)', options: [`${match.team_a}/${match.team_a}`, `${match.team_a}/${match.team_b}`, `${match.team_b}/${match.team_a}`, `${match.team_b}/${match.team_b}`] },
       { type: 'BK_CENTURY', category: 'BOOKMAKER', question: 'Century scored in match?', options: ['Yes', 'No'] },
       { type: 'BK_TOP_BATSMAN', category: 'BOOKMAKER', question: 'Top Batsman of Match', options: [match.team_a, match.team_b, 'Others'] },
       { type: 'BK_TOP_BOWLER', category: 'BOOKMAKER', question: 'Top Wicket Taker of Match', options: [match.team_a, match.team_b, 'Others'] },
       { type: 'BK_MOST_SIXES', category: 'BOOKMAKER', question: 'Team to hit most sixes', options: [match.team_a, match.team_b, 'Draw'] },
       { type: 'BK_HAT_TRICK', category: 'BOOKMAKER', question: 'Hat-trick in match?', options: ['Yes', 'No'] },
-      // ===== FANCY (3 markets) =====
+      { type: 'BK_MAN_OF_MATCH', category: 'BOOKMAKER', question: 'Man of the Match', options: [match.team_a + ' Star', match.team_b + ' Star', 'Others'] },
+      { type: 'BK_ECONOMY_BOWLER', category: 'BOOKMAKER', question: 'Most Economical Bowler', options: [match.team_a, match.team_b] },
+
+      // ===== FANCY (7 markets) =====
       { type: 'FY_WICKET_METHOD', category: 'FANCY', question: 'Next Wicket Method', options: ['Caught', 'Bowled', 'LBW', 'Run Out', 'Others'] },
       { type: 'FY_SESSION_10', category: 'FANCY', question: '1st Innings 10 Over Runs (Over/Under 78.5)', options: ['Under 78.5', 'Over 78.5'] },
       { type: 'FY_BALL_BY_BALL', category: 'FANCY', question: 'Next Ball Outcome', options: ['Dot', 'Single', 'Boundary', 'Wicket', 'Others'] },
+      { type: 'FY_FIRST_MATCH_PARTNERSHIP', category: 'FANCY', question: '1st Wicket Partnership (Over/Under 25.5)', options: ['Under 25.5', 'Over 25.5'] },
+      { type: 'FY_POWERPLAY_WICKETS', category: 'FANCY', question: 'Total Wickets in Powerplay (Over/Under 1.5)', options: ['Under 1.5', 'Over 1.5'] },
+      { type: 'FY_WICKET_IN_OVER', category: 'FANCY', question: 'Will a Wicket fall in this over?', options: ['Yes', 'No'] },
+      { type: 'FY_HIGHEST_RUN_OVER', category: 'FANCY', question: 'Highest Scoring Over (Over/Under 18.5)', options: ['Under 18.5', 'Over 18.5'] },
     ];
 
     for (const pred of allPredictions) {
