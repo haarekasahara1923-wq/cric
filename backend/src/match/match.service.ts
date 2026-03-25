@@ -25,6 +25,10 @@ export class MatchService implements OnModuleInit {
 
   async onModuleInit() {
     this.logger.log('Match Service Initialized');
+    // Start sync immediately on startup
+    this.syncUpcomingMatches().catch(err => {
+      this.logger.error('Failed initial match sync:', err.message);
+    });
   }
 
   @Cron('*/30 * * * * *') // Run every 30 seconds as requested
