@@ -20,21 +20,11 @@ export class MatchController {
     return this.predictionService.getLeaderboard();
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post('bet/place')
-  async placeBet(@Req() req, @Body() body: any) {
-    return this.predictionService.placeBet(req.user.id, body);
-  }
-
-  @Get(':id')
-  async getMatchById(@Param('id') id: string) {
-    return this.matchService.getMatchById(id);
-  }
-
+  // IMPORTANT: Named routes MUST be above :id param route
   @Get('sync/upcoming')
   async syncUpcomingMatches() {
     await this.matchService.syncUpcomingMatches();
-    return { message: 'Upcoming IPL matches sync triggered' };
+    return { message: 'Sync triggered successfully' };
   }
 
   @Get('sync/predictions')
@@ -43,6 +33,19 @@ export class MatchController {
     for (const match of matches) {
       await this.matchService.generateMatchPredictions(match.id);
     }
-    return { message: 'Predictions generation triggered for all matches' };
+    return { message: `Predictions generated for ${matches.length} matches` };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('bet/place')
+  async placeBet(@Req() req, @Body() body: any) {
+    return this.predictionService.placeBet(req.user.id, body);
+  }
+
+  // Parameterized route MUST be LAST
+  @Get(':id')
+  async getMatchById(@Param('id') id: string) {
+    return this.matchService.getMatchById(id);
   }
 }
+
